@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Siham</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cline x1='16' y1='28' x2='16' y2='4' stroke='%23C4785A' stroke-width='3' stroke-linecap='round'/%3E%3Cpolyline points='9,11 16,4 23,11' fill='none' stroke='%23C4785A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='10,26 16,28 22,26' fill='none' stroke='%23C4785A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -217,6 +218,45 @@
   .event-chip-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
   #emailjs-note { font-size:11px;color:var(--mid);opacity:0.55;margin-top:1rem;line-height:1.6;letter-spacing:0.02em; }
 
+
+  /* fishbowl */
+  .fishbowl-wrap { display:flex;justify-content:center;margin-top:1.8rem;cursor:pointer; }
+  .fishbowl-btn { position:relative;background:none;border:none;cursor:pointer;padding:0; }
+  .fishbowl-svg { transition:transform 0.3s ease; }
+  .fishbowl-btn:hover .fishbowl-svg { transform:scale(1.06); }
+  .fishbowl-count {
+    position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+    font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;
+    color:var(--mid);pointer-events:none;white-space:nowrap;
+  }
+  /* fishbowl modal */
+  #bowl-modal {
+    position:fixed;inset:0;z-index:1000;display:none;
+    align-items:center;justify-content:center;
+    background:rgba(44,24,16,0.4);backdrop-filter:blur(5px);
+    padding:1rem;
+  }
+  #bowl-modal.open { display:flex; }
+  .bowl-modal-box {
+    background:var(--cream);border-radius:20px;padding:2rem;
+    width:100%;max-width:420px;max-height:75vh;
+    border:1px solid var(--blush);
+    display:flex;flex-direction:column;gap:14px;
+    animation:fadeUp 0.3s ease;
+  }
+  .bowl-modal-header { display:flex;justify-content:space-between;align-items:center; }
+  .bowl-modal-header h3 { font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:var(--deep); }
+  .bowl-close { background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--mid);line-height:1; }
+  .bowl-notes { overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px; }
+  .bowl-note {
+    background:var(--warm);border:1px solid var(--blush);border-radius:12px;
+    padding:12px 14px;
+    animation:fadeUp 0.3s ease;
+  }
+  .bowl-note-text { font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--deep);line-height:1.5; }
+  .bowl-note-date { font-size:11px;color:var(--mid);opacity:0.6;margin-top:4px;letter-spacing:0.05em; }
+  .bowl-empty { font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mid);opacity:0.6;text-align:center;padding:1.5rem 0; }
+
 </style>
 </head>
 <body>
@@ -295,12 +335,57 @@
       <button class="suggest-submit" id="suggest-btn">send it ↗</button>
     </div>
   </div>
-  <div id="suggest-history-toggle" style="display:none;margin-top:1.4rem;">
-    <button id="toggle-history-btn" style="background:none;border:none;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;padding:0;display:flex;align-items:center;gap:6px;">
-      <span id="toggle-arrow" style="transition:transform 0.2s;">▸</span> past suggestions (<span id="suggest-count">0</span>)
-    </button>
+  <div id="suggest-history-toggle" style="display:none;">
+    <div class="fishbowl-wrap">
+      <button class="fishbowl-btn" id="fishbowl-btn" title="see past suggestions">
+        <svg class="fishbowl-svg" width="110" height="120" viewBox="0 0 110 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- bowl glass -->
+          <ellipse cx="55" cy="75" rx="42" ry="36" fill="#E8F4F8" fill-opacity="0.55" stroke="#B8D4DC" stroke-width="1.5"/>
+          <!-- water fill -->
+          <ellipse cx="55" cy="82" rx="38" ry="26" fill="#C8E8F0" fill-opacity="0.45"/>
+          <!-- rim -->
+          <ellipse cx="55" cy="44" rx="22" ry="7" fill="none" stroke="#B8D4DC" stroke-width="1.5"/>
+          <!-- neck -->
+          <path d="M33 44 Q30 60 13 75" stroke="#B8D4DC" stroke-width="1.5" fill="none"/>
+          <path d="M77 44 Q80 60 97 75" stroke="#B8D4DC" stroke-width="1.5" fill="none"/>
+          <!-- little fish -->
+          <g transform="translate(38,78) rotate(-15)">
+            <ellipse cx="0" cy="0" rx="9" ry="5" fill="#C4785A" opacity="0.85"/>
+            <path d="M-9,0 L-15,-4 L-13,0 L-15,4 Z" fill="#C4785A" opacity="0.7"/>
+            <circle cx="5" cy="-1.5" r="1.2" fill="#2C1810"/>
+          </g>
+          <!-- second small fish -->
+          <g transform="translate(62,68) rotate(10) scale(0.7)">
+            <ellipse cx="0" cy="0" rx="9" ry="5" fill="#7A4A38" opacity="0.7"/>
+            <path d="M-9,0 L-15,-4 L-13,0 L-15,4 Z" fill="#7A4A38" opacity="0.6"/>
+            <circle cx="5" cy="-1.5" r="1.2" fill="#2C1810"/>
+          </g>
+          <!-- bubbles -->
+          <circle cx="48" cy="58" r="2" fill="none" stroke="#B8D4DC" stroke-width="1"/>
+          <circle cx="55" cy="52" r="1.4" fill="none" stroke="#B8D4DC" stroke-width="1"/>
+          <circle cx="63" cy="56" r="1.8" fill="none" stroke="#B8D4DC" stroke-width="1"/>
+          <!-- notes floating as little scrolls -->
+          <g opacity="0.6">
+            <rect x="44" y="70" width="10" height="7" rx="1.5" fill="#FAF7F2" stroke="#C4785A" stroke-width="0.8"/>
+            <line x1="46" y1="72.5" x2="52" y2="72.5" stroke="#C4785A" stroke-width="0.6"/>
+            <line x1="46" y1="74.5" x2="51" y2="74.5" stroke="#C4785A" stroke-width="0.6"/>
+          </g>
+        </svg>
+        <div class="fishbowl-count" id="suggest-count-label"></div>
+      </button>
+    </div>
   </div>
-  <div class="suggest-list" id="suggest-list" style="display:none;"></div>
+
+  <!-- bowl modal -->
+  <div id="bowl-modal">
+    <div class="bowl-modal-box">
+      <div class="bowl-modal-header">
+        <h3>her thoughts 🏹</h3>
+        <button class="bowl-close" id="bowl-close">✕</button>
+      </div>
+      <div class="bowl-notes" id="bowl-notes"></div>
+    </div>
+  </div>
 </section>
 
 <!-- ── CALENDAR ── -->
@@ -848,39 +933,42 @@ function renderSuggestions() {
   const toggleWrap = document.getElementById('suggest-history-toggle');
   const toggleArrow = document.getElementById('toggle-arrow');
 
-  if (countEl) countEl.textContent = items.length;
-
-  if (items.length) {
-    toggleWrap.style.display = 'block';
-  } else {
-    toggleWrap.style.display = 'none';
-    suggestList.style.display = 'none';
-    historyOpen = false;
+  // update fishbowl count label
+  const countLabel = document.getElementById('suggest-count-label');
+  if (toggleWrap) {
+    if (items.length) {
+      toggleWrap.style.display = 'block';
+      if (countLabel) countLabel.textContent = items.length === 1 ? '1 thought' : items.length + ' thoughts';
+    } else {
+      toggleWrap.style.display = 'none';
+    }
   }
-
-  suggestList.innerHTML = '';
-  if (!items.length) return;
-
-  // newest first
-  items.slice().reverse().forEach((item, idx) => {
-    const el = document.createElement('div');
-    el.className = 'suggest-item';
-    el.style.animationDelay = (idx * 0.04) + 's';
-    el.innerHTML = `
-      <span class="suggest-item-text">${escHtml(item.text)}</span>
-      <span class="suggest-item-meta">${item.date}</span>
-    `;
-    suggestList.appendChild(el);
-  });
-
-  if (toggleArrow) toggleArrow.style.transform = historyOpen ? 'rotate(90deg)' : 'rotate(0deg)';
-  suggestList.style.display = historyOpen ? 'flex' : 'none';
 }
 
-document.getElementById('toggle-history-btn') && document.getElementById('toggle-history-btn').addEventListener('click', () => {
-  historyOpen = !historyOpen;
-  renderSuggestions();
-});
+// fishbowl open/close
+const bowlModal = document.getElementById('bowl-modal');
+const bowlNotes = document.getElementById('bowl-notes');
+
+function openBowl() {
+  const items = getSuggestions();
+  bowlNotes.innerHTML = '';
+  if (!items.length) {
+    bowlNotes.innerHTML = '<p class="bowl-empty">nothing yet — she hasn\'t sent anything</p>';
+  } else {
+    items.slice().reverse().forEach((item, i) => {
+      const el = document.createElement('div');
+      el.className = 'bowl-note';
+      el.style.animationDelay = (i * 0.05) + 's';
+      el.innerHTML = `<div class="bowl-note-text">${escHtml(item.text)}</div><div class="bowl-note-date">${item.date}</div>`;
+      bowlNotes.appendChild(el);
+    });
+  }
+  bowlModal.classList.add('open');
+}
+
+document.getElementById('fishbowl-btn') && document.getElementById('fishbowl-btn').addEventListener('click', openBowl);
+document.getElementById('bowl-close') && document.getElementById('bowl-close').addEventListener('click', () => bowlModal.classList.remove('open'));
+bowlModal.addEventListener('click', e => { if (e.target === bowlModal) bowlModal.classList.remove('open'); });
 
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -934,7 +1022,6 @@ suggestBtn.addEventListener('click', () => {
   // fly the letter
   flyingLetter(suggestBtn, () => {});
   suggestInput.value = '';
-  historyOpen = true; // auto-open history after sending
 
   // try emailjs
   loadEmailJS(() => {
