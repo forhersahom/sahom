@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Siham</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2; --warm: #F0E8DA; --blush: #E8C8B8;
+    --deep: #2C1810; --mid: #7A4A38; --accent: #C4785A;
+  }
+  body { background: var(--cream); color: var(--deep); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+  .stars { position: fixed; top:0;left:0;right:0;bottom:0; pointer-events:none; z-index:0; }
+  .star { position:absolute; width:2px;height:2px; background:var(--accent); border-radius:50%; opacity:0; animation: twinkle var(--d,4s) var(--delay,0s) infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0;transform:scale(1)} 50%{opacity:0.35;transform:scale(1.5)} }
+
+  .hero { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:4rem 2rem; overflow:hidden; }
+  .distance-badge { font-family:'DM Sans',sans-serif; font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:2rem; opacity:0; animation:fadeUp 1s 0.3s forwards; }
+  .hero-sub { font-family:'Cormorant Garamond',serif; font-size:clamp(1rem,3vw,1.4rem); font-weight:300; color:var(--mid); margin-top:1.5rem; max-width:400px; line-height:1.7; opacity:0; animation:fadeUp 1s 0.9s forwards; }
+  .scroll-hint { position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; opacity:0; animation:fadeUp 1s 1.5s forwards; }
+  .scroll-hint span { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--mid); opacity:0.6; }
+  .scroll-line { width:1px; height:40px; background:linear-gradient(to bottom,var(--accent),transparent); animation:scrollPulse 2s 2s infinite; }
+  @keyframes scrollPulse { 0%,100%{opacity:0.4;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  /* music button */
+  #music-btn {
+    margin-top: 1.8rem;
+    background: none;
+    border: 1px solid var(--blush);
+    color: var(--mid);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 22px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    opacity: 0;
+    animation: fadeUp 1s 1.1s forwards;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  #music-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #music-btn .note { font-size: 14px; }
+
+  /* letter */
+  .letter-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .section-tag { font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:3rem;display:block; }
+  .letter-body { font-family:'Cormorant Garamond',serif;font-size:clamp(1.1rem,2.5vw,1.35rem);font-weight:300;line-height:1.9;color:var(--deep); }
+  .letter-body p { margin-bottom:1.8em;opacity:0;transform:translateY(16px);transition:opacity 0.7s ease,transform 0.7s ease; }
+  .letter-body p.visible { opacity:1;transform:translateY(0); }
+  .letter-sig { font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-style:italic;font-weight:300;color:var(--accent);margin-top:3rem;opacity:0;transform:translateY(16px);transition:opacity 0.7s ease,transform 0.7s ease; }
+  .letter-sig.visible { opacity:1;transform:translateY(0); }
+
+  .divider { position:relative;z-index:1;display:flex;align-items:center;gap:1.5rem;max-width:640px;margin:0 auto;padding:0 2rem; }
+  .divider-line { flex:1;height:1px;background:var(--blush); }
+  .divider-dot { width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.6; }
+
+  /* reasons */
+  .reasons-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .reasons-intro { font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:300;color:var(--deep);margin-bottom:0.5rem; }
+  .reasons-intro em { color:var(--accent);font-style:italic; }
+  .reasons-desc { font-size:13px;color:var(--mid);margin-bottom:3rem;letter-spacing:0.03em; }
+  .reasons-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px; }
+  .reason-card { background:var(--warm);border:1px solid var(--blush);border-radius:12px;padding:1.5rem 1.25rem;cursor:pointer;transition:transform 0.2s ease,border-color 0.3s ease,background 0.3s ease;min-height:110px;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden; }
+  .reason-card:hover { transform:translateY(-2px);border-color:var(--accent); }
+  .reason-card.revealed { background:var(--deep);border-color:var(--deep); }
+  .reason-lock { font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-style:italic;color:var(--mid); }
+  .reason-card.revealed .reason-lock { display:none; }
+  .reason-text { font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--cream);line-height:1.5;display:none;animation:revealText 0.5s ease forwards; }
+  .reason-num { position:absolute;top:10px;right:12px;font-size:10px;letter-spacing:0.1em;color:var(--accent);font-weight:400;opacity:0.5; }
+  .reason-card.revealed .reason-num { color:var(--blush); }
+  @keyframes revealText { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+  .reason-card.revealed .reason-text { display:block; }
+
+  /* game section */
+  .game-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto;text-align:center; }
+  .game-section .section-tag { margin-bottom:0.6rem; }
+  .game-title { font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:300;color:var(--deep);margin-bottom:0.4rem; }
+  .game-title em { color:var(--accent);font-style:italic; }
+  .game-desc { font-size:13px;color:var(--mid);margin-bottom:2rem;letter-spacing:0.03em; }
+  #game-wrap {
+    position:relative;
+    border: 1px solid var(--blush);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--warm);
+    user-select: none;
+  }
+  #game-canvas { display:block;width:100%;cursor:none; }
+  #game-ui {
+    position:absolute;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;
+    pointer-events:none;
+  }
+  .game-stat { font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid); }
+  .game-stat span { color:var(--accent);font-weight:400; }
+  #game-overlay {
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(250,247,242,0.92);
+    gap:12px;
+  }
+  #game-overlay h3 { font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--deep); }
+  #game-overlay p { font-size:13px;color:var(--mid);letter-spacing:0.05em; }
+  #game-start-btn, #game-restart-btn {
+    background:none;border:1px solid var(--accent);color:var(--accent);
+    font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+    padding:9px 24px;border-radius:40px;cursor:pointer;transition:background 0.2s,color 0.2s;
+  }
+  #game-start-btn:hover, #game-restart-btn:hover { background:var(--accent);color:var(--cream); }
+
+  /* footer */
+  .footer { position:relative;z-index:1;text-align:center;padding:4rem 2rem 6rem;opacity:0;transform:translateY(16px);transition:opacity 0.7s,transform 0.7s; }
+  .footer.visible { opacity:1;transform:translateY(0); }
+  .footer-heart { font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,6vw,3.5rem);font-style:italic;color:var(--accent);line-height:1; }
+  .footer-note { font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);margin-top:0.8rem;opacity:0.6; }
+
+  /* ── suggestion box ── */
+  .suggest-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .suggest-box { background:var(--warm);border:1px solid var(--blush);border-radius:16px;padding:2rem; }
+  .suggest-box textarea {
+    width:100%;min-height:90px;background:var(--cream);border:1px solid var(--blush);
+    border-radius:10px;padding:12px 14px;font-family:'Cormorant Garamond',serif;font-size:1.05rem;
+    color:var(--deep);resize:none;outline:none;transition:border-color 0.2s;
+  }
+  .suggest-box textarea:focus { border-color:var(--accent); }
+  .suggest-box textarea::placeholder { color:var(--mid);opacity:0.6; }
+  .suggest-actions { display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px; }
+  .suggest-submit {
+    background:none;border:1px solid var(--accent);color:var(--accent);
+    font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+    padding:9px 24px;border-radius:40px;cursor:pointer;transition:background 0.2s,color 0.2s;white-space:nowrap;
+  }
+  .suggest-submit:hover { background:var(--accent);color:var(--cream); }
+  .suggest-list { margin-top:1.5rem;display:flex;flex-direction:column;gap:10px; }
+  .suggest-item {
+    background:var(--cream);border:1px solid var(--blush);border-radius:10px;
+    padding:12px 14px;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--deep);
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+    animation:fadeUp 0.4s ease forwards;
+  }
+  .suggest-item-text { flex:1;line-height:1.5; }
+  .suggest-item-meta { font-size:11px;color:var(--mid);opacity:0.6;white-space:nowrap;padding-top:2px; }
+  .suggest-empty { font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mid);opacity:0.6;font-size:1rem;text-align:center;padding:1rem 0; }
+
+  /* flying letter animation */
+  .flying-letter {
+    position:fixed;z-index:9999;pointer-events:none;
+    width:60px;height:44px;
+    transform-origin:center center;
+  }
+
+  /* ── calendar ── */
+  .cal-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .cal-wrap { border:1px solid var(--blush);border-radius:16px;overflow:hidden;background:var(--warm); }
+  .cal-header { display:flex;justify-content:space-between;align-items:center;padding:1rem 1.4rem;border-bottom:1px solid var(--blush); }
+  .cal-month { font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--deep); }
+  .cal-nav { background:none;border:none;color:var(--accent);font-size:1.1rem;cursor:pointer;padding:4px 10px;border-radius:6px;transition:background 0.2s; }
+  .cal-nav:hover { background:var(--blush); }
+  .cal-grid { display:grid;grid-template-columns:repeat(7,1fr); }
+  .cal-dow { text-align:center;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);padding:10px 0;opacity:0.7; }
+  .cal-day {
+    aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-size:13px;color:var(--deep);cursor:pointer;border-radius:8px;margin:2px;
+    transition:background 0.15s;position:relative;gap:2px;
+  }
+  .cal-day:hover { background:var(--blush); }
+  .cal-day.today { background:var(--blush);font-weight:500; }
+  .cal-day.has-event::after { content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--accent); }
+  .cal-day.empty { pointer-events:none;opacity:0; }
+  .cal-day.other-month { opacity:0.3; }
+
+  /* event modal */
+  #event-modal {
+    position:fixed;inset:0;z-index:1000;display:none;
+    align-items:center;justify-content:center;
+    background:rgba(44,24,16,0.35);backdrop-filter:blur(4px);
+    padding:1rem;
+  }
+  #event-modal.open { display:flex; }
+  .event-modal-box {
+    background:var(--cream);border-radius:16px;padding:2rem;width:100%;max-width:380px;
+    border:1px solid var(--blush);
+    animation:fadeUp 0.3s ease;
+  }
+  .event-modal-box h3 { font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:1.2rem;color:var(--deep); }
+  .event-modal-box input, .event-modal-box select {
+    width:100%;border:1px solid var(--blush);background:var(--warm);border-radius:8px;
+    padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--deep);
+    outline:none;margin-bottom:10px;transition:border-color 0.2s;
+  }
+  .event-modal-box input:focus, .event-modal-box select:focus { border-color:var(--accent); }
+  .event-modal-actions { display:flex;gap:10px;margin-top:6px; }
+  .event-modal-actions button {
+    flex:1;padding:9px;border-radius:40px;cursor:pointer;font-family:'DM Sans',sans-serif;
+    font-size:11px;letter-spacing:0.15em;text-transform:uppercase;transition:all 0.2s;
+  }
+  #event-save { background:var(--accent);color:var(--cream);border:1px solid var(--accent); }
+  #event-save:hover { background:var(--deep);border-color:var(--deep); }
+  #event-cancel { background:none;border:1px solid var(--blush);color:var(--mid); }
+  #event-cancel:hover { border-color:var(--mid); }
+  #event-delete { background:none;border:1px solid #E24B4A;color:#E24B4A;display:none; }
+  #event-delete:hover { background:#E24B4A;color:white; }
+  .event-list-below { padding:1rem 1.4rem;border-top:1px solid var(--blush); }
+  .event-chip {
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--cream);border:1px solid var(--blush);border-radius:20px;
+    padding:4px 10px 4px 8px;font-size:12px;color:var(--deep);margin:3px;cursor:pointer;
+    transition:border-color 0.2s;
+  }
+  .event-chip:hover { border-color:var(--accent); }
+  .event-chip-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+  #emailjs-note { font-size:11px;color:var(--mid);opacity:0.55;margin-top:1rem;line-height:1.6;letter-spacing:0.02em; }
+
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<canvas id="bird-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+
+<section class="hero">
+  <span class="distance-badge">a little something for you</span>
+  <div style="position:relative;display:inline-block;">
+    <canvas id="name-canvas" style="display:block;"></canvas>
+    <p style="font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-top:0.4rem;opacity:0.7;">سهام — arrows</p>
+  </div>
+  <p class="hero-sub">Hey lol, this is for you!</p>
+  <button id="music-btn"><span class="note">♩</span> play piano</button>
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<section class="letter-section">
+  <span class="section-tag">a letter</span>
+  <div class="letter-body">
+    <p>I made this for you because um why not lol.</p>
+    <p>Gneuinly thank you for making each day way more bearable whether it was at work or at home. Like shit was boring unti you popped up fr fr</p>
+    <p>I'm not really good at writing shit yk but you get the point. Pretend this is smth cringey and corny about how much I like you lol</p>
+    <p>Anyways glad youre mine.</p>
+  </div>
+  <div class="letter-sig">always yours ♡</div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<section class="reasons-section">
+  <h2 class="reasons-intro">reasons I love <em>you</em></h2>
+  <p class="reasons-desc">tap each one to reveal</p>
+  <div class="reasons-grid" id="reasons-grid"></div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<!-- GAME -->
+<section class="game-section">
+  <span class="section-tag">mini game</span>
+  <h2 class="game-title">catch the <em>arrows</em></h2>
+  <p class="game-desc">move your basket — catch arrows, dodge hearts (jk catch those too)</p>
+  <div id="game-wrap">
+    <canvas id="game-canvas"></canvas>
+    <div id="game-ui">
+      <div class="game-stat">score <span id="score-val">0</span></div>
+      <div class="game-stat">lives <span id="lives-val">♡ ♡ ♡</span></div>
+    </div>
+    <div id="game-overlay">
+      <h3>سهام</h3>
+      <p>catch the arrows — they're named after you</p>
+      <button id="game-start-btn">play</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+
+<!-- ── SUGGESTION BOX ── -->
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<section class="suggest-section">
+  <span class="section-tag">suggestion box</span>
+  <h2 class="reasons-intro" style="margin-bottom:0.5rem;">got an <em>idea?</em></h2>
+  <p class="reasons-desc" style="margin-bottom:1.8rem;">random thoughts, date ideas, anything — it goes straight to him</p>
+  <div class="suggest-box">
+    <textarea id="suggest-input" placeholder="write whatever's on your mind..."></textarea>
+    <div class="suggest-actions">
+      <span style="font-size:11px;color:var(--mid);opacity:0.6;letter-spacing:0.05em;">saved locally + sent to him</span>
+      <button class="suggest-submit" id="suggest-btn">send it ↗</button>
+    </div>
+  </div>
+  <div id="suggest-history-toggle" style="display:none;margin-top:1.4rem;">
+    <button id="toggle-history-btn" style="background:none;border:none;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;padding:0;display:flex;align-items:center;gap:6px;">
+      <span id="toggle-arrow" style="transition:transform 0.2s;">▸</span> past suggestions (<span id="suggest-count">0</span>)
+    </button>
+  </div>
+  <div class="suggest-list" id="suggest-list" style="display:none;"></div>
+</section>
+
+<!-- ── CALENDAR ── -->
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<section class="cal-section">
+  <span class="section-tag">calendar</span>
+  <h2 class="reasons-intro" style="margin-bottom:0.5rem;">our <em>dates</em></h2>
+  <p class="reasons-desc" style="margin-bottom:1.8rem;">click any day to add something — anniversaries, trips, whatever</p>
+  <div class="cal-wrap">
+    <div class="cal-header">
+      <button class="cal-nav" id="cal-prev">&#8592;</button>
+      <span class="cal-month" id="cal-month-label"></span>
+      <button class="cal-nav" id="cal-next">&#8594;</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="event-list-below" id="event-list-below" style="display:none;"></div>
+  </div>
+</section>
+
+<!-- event modal -->
+<div id="event-modal">
+  <div class="event-modal-box">
+    <h3 id="modal-date-label">add event</h3>
+    <input type="text" id="event-title" placeholder="what's happening?" maxlength="60">
+    <select id="event-color">
+      <option value="#C4785A">🟠 warm (date)</option>
+      <option value="#7A9A5A">🟢 green (trip)</option>
+      <option value="#7A5AA0">🟣 purple (special)</option>
+      <option value="#5A7AA0">🔵 blue (reminder)</option>
+    </select>
+    <div class="event-modal-actions">
+      <button id="event-cancel">cancel</button>
+      <button id="event-delete">delete</button>
+      <button id="event-save">save</button>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<div class="footer" id="footer">
+  <div class="footer-heart">for Siham, always.</div>
+  <p class="footer-note">made with way too much love</p>
+</div>
+
+<script>
+// ── Stars ──
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 60; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.setProperty('--d', (3 + Math.random() * 5) + 's');
+  s.style.setProperty('--delay', (Math.random() * 6) + 's');
+  if (Math.random() > 0.7) { s.style.width = '3px'; s.style.height = '3px'; }
+  starsEl.appendChild(s);
+}
+
+// ── Reasons ──
+const reasons = [
+  "everything","eyes lol","hair.","lips ofc stop being insecure",
+  "smarty smart fr","yk what im thinking of","U speak french thats lwk hella cool",
+  "i dont wanna kms anymore","hi hey lmfao lol, any pic honestly make my day",
+];
+const grid = document.getElementById('reasons-grid');
+reasons.forEach((r, i) => {
+  const card = document.createElement('div');
+  card.className = 'reason-card';
+  card.innerHTML = `<span class="reason-num">${String(i+1).padStart(2,'0')}</span><span class="reason-lock">tap to reveal</span><span class="reason-text">${r}</span>`;
+  card.addEventListener('click', () => card.classList.toggle('revealed'));
+  grid.appendChild(card);
+});
+
+// ── Scroll reveal ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.letter-body p, .letter-sig, #footer').forEach(el => observer.observe(el));
+
+// ── Piano music via Web Audio ──
+const musicBtn = document.getElementById('music-btn');
+let audioCtx = null;
+let musicPlaying = false;
+let musicNodes = [];
+
+// A gentle piano melody — Moonlight Sonata-ish arpeggios
+const MELODY = [
+  // note frequencies (Hz) and durations (s)
+  // pattern repeats: bass + treble arpeggio
+  {f:261.6,d:0.5},{f:329.6,d:0.5},{f:392.0,d:0.5},
+  {f:329.6,d:0.5},{f:392.0,d:0.5},{f:493.9,d:0.5},
+  {f:349.2,d:0.5},{f:440.0,d:0.5},{f:523.3,d:0.5},
+  {f:440.0,d:0.5},{f:523.3,d:0.5},{f:659.3,d:0.5},
+  {f:392.0,d:0.5},{f:493.9,d:0.5},{f:587.3,d:0.5},
+  {f:329.6,d:0.5},{f:415.3,d:0.5},{f:523.3,d:0.5},
+  {f:261.6,d:0.5},{f:329.6,d:0.5},{f:392.0,d:0.5},
+  {f:246.9,d:0.5},{f:311.1,d:0.5},{f:392.0,d:0.5},
+];
+
+function playPianoNote(ctx, freq, startTime, duration, gain=0.18) {
+  const osc = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  // slight detuning for two oscillators = piano-ish timbre
+  const osc2 = ctx.createOscillator();
+  const gainNode2 = ctx.createGain();
+
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  osc2.type = 'sine';
+  osc2.frequency.value = freq * 1.002; // slight detune
+
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.01);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 2.5);
+
+  gainNode2.gain.setValueAtTime(0, startTime);
+  gainNode2.gain.linearRampToValueAtTime(gain * 0.5, startTime + 0.01);
+  gainNode2.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 2.0);
+
+  // soft reverb via convolver would be ideal but we'll use a delay node for warmth
+  const delay = ctx.createDelay(0.3);
+  delay.delayTime.value = 0.08;
+  const delayGain = ctx.createGain();
+  delayGain.gain.value = 0.15;
+
+  osc.connect(gainNode); gainNode.connect(ctx.destination);
+  osc2.connect(gainNode2); gainNode2.connect(delay);
+  delay.connect(delayGain); delayGain.connect(ctx.destination);
+
+  osc.start(startTime); osc.stop(startTime + duration * 3);
+  osc2.start(startTime); osc2.stop(startTime + duration * 2.5);
+
+  return [osc, osc2, gainNode, gainNode2];
+}
+
+function scheduleMelody(ctx) {
+  let t = ctx.currentTime + 0.1;
+  const allNodes = [];
+  const loop = () => {
+    if (!musicPlaying) return;
+    MELODY.forEach(({f, d}) => {
+      const nodes = playPianoNote(ctx, f, t, d);
+      allNodes.push(...nodes);
+      t += d * 0.62;
+    });
+    // schedule next loop
+    const loopDuration = MELODY.reduce((acc, n) => acc + n.d * 0.62, 0);
+    setTimeout(loop, (t - ctx.currentTime - loopDuration * 0.1) * 1000);
+  };
+  loop();
+}
+
+musicBtn.addEventListener('click', () => {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  musicPlaying = !musicPlaying;
+  if (musicPlaying) {
+    musicBtn.innerHTML = '<span class="note">♩</span> pause';
+    scheduleMelody(audioCtx);
+  } else {
+    musicBtn.innerHTML = '<span class="note">♩</span> play piano';
+  }
+});
+
+// ── Name animation ──
+const nameCanvas = document.getElementById('name-canvas');
+const nctx = nameCanvas.getContext('2d');
+const BASE_H = Math.min(window.innerWidth * 0.18, 110);
+nameCanvas.width  = Math.min(window.innerWidth * 0.9, 560);
+nameCanvas.height = BASE_H * 1.25;
+const W = nameCanvas.width, H = nameCanvas.height;
+const DEEP_C = '#2C1810', ACC_C = '#C4785A';
+const CELL_W = W / 6.2, CELL_H = BASE_H;
+
+const letters = [
+  { char:'S', strokes:[[[0.75,0.15],[0.5,0.08],[0.25,0.15],[0.15,0.3],[0.25,0.45],[0.5,0.5],[0.75,0.6],[0.82,0.75],[0.7,0.9],[0.45,0.97],[0.2,0.9],[0.1,0.78]]]},
+  { char:'i', strokes:[[[0.45,0.35],[0.45,0.95]],[[0.45,0.15],[0.45,0.2]]]},
+  { char:'h', strokes:[[[0.2,0.1],[0.2,0.95]],[[0.2,0.52],[0.38,0.38],[0.6,0.35],[0.72,0.42],[0.75,0.55],[0.75,0.95]]]},
+  { char:'a', strokes:[[[0.72,0.38],[0.55,0.32],[0.3,0.36],[0.18,0.52],[0.18,0.68],[0.3,0.88],[0.55,0.97],[0.72,0.9],[0.78,0.72],[0.78,0.38],[0.78,0.95]]]},
+  { char:'m', strokes:[[[0.1,0.38],[0.1,0.95]],[[0.1,0.48],[0.28,0.33],[0.45,0.33],[0.52,0.45],[0.52,0.95]],[[0.52,0.48],[0.68,0.33],[0.84,0.33],[0.9,0.45],[0.9,0.95]]]},
+];
+const arrowDefs = [
+  {relX:-0.5,relY:0.35,angle:-30,size:1.1},{relX:6.7,relY:0.42,angle:15,size:1.0},
+  {relX:2.5,relY:-0.18,angle:-45,size:0.85},{relX:4.2,relY:1.1,angle:10,size:0.9},
+  {relX:-0.2,relY:1.15,angle:35,size:0.75},{relX:6.2,relY:-0.1,angle:-20,size:0.8},
+];
+
+function drawArrowDeco(x,y,angleDeg,size,alpha) {
+  const len=28*size, rad=angleDeg*Math.PI/180;
+  const ex=x+Math.cos(rad)*len, ey=y+Math.sin(rad)*len;
+  nctx.save(); nctx.globalAlpha=alpha; nctx.strokeStyle=ACC_C; nctx.lineWidth=1.5*size; nctx.lineCap='round';
+  nctx.beginPath(); nctx.moveTo(x,y); nctx.lineTo(ex,ey); nctx.stroke();
+  const hw=7*size,a1=rad+2.5,a2=rad-2.5;
+  nctx.beginPath(); nctx.moveTo(ex,ey); nctx.lineTo(ex+Math.cos(a1)*hw,ey+Math.sin(a1)*hw); nctx.moveTo(ex,ey); nctx.lineTo(ex+Math.cos(a2)*hw,ey+Math.sin(a2)*hw); nctx.stroke();
+  const fx=x-Math.cos(rad)*6*size,fy=y-Math.sin(rad)*6*size;
+  nctx.beginPath(); nctx.moveTo(x,y); nctx.lineTo(fx+Math.cos(rad+1.4)*8*size,fy+Math.sin(rad+1.4)*8*size); nctx.moveTo(x,y); nctx.lineTo(fx+Math.cos(rad-1.4)*8*size,fy+Math.sin(rad-1.4)*8*size); nctx.stroke();
+  nctx.restore();
+}
+
+const allSegs=[], totalLetterW=CELL_W*5.2, startX=(W-totalLetterW)/2;
+letters.forEach((letter,li) => {
+  const ox=startX+li*CELL_W;
+  letter.strokes.forEach(stroke => {
+    const pts=stroke.map(([nx,ny])=>[ox+nx*CELL_W*0.82, H*0.08+ny*CELL_H*0.88]);
+    allSegs.push({pts,isArrow:false});
+  });
+});
+arrowDefs.forEach(a => allSegs.push({isArrow:true,x:startX+a.relX*CELL_W,y:H*0.08+a.relY*CELL_H*0.88,angle:a.angle,size:a.size}));
+
+let segIdx=0,ptProgress=0,nameDone=false;
+const drawnSegs=[];
+
+function animateName() {
+  if(nameDone) return;
+  requestAnimationFrame(animateName);
+  const seg=allSegs[segIdx];
+  if(!seg){nameDone=true;return;}
+  if(seg.isArrow) {
+    seg.alpha=Math.min(1,(seg.alpha||0)+0.06);
+    drawnSegs[segIdx]=seg;
+    nctx.clearRect(0,0,W,H);
+    drawnSegs.forEach(ds => {
+      if(!ds) return;
+      if(ds.isArrow){drawArrowDeco(ds.x,ds.y,ds.angle,ds.size,ds.alpha);return;}
+      nctx.strokeStyle=DEEP_C;nctx.lineWidth=3.2;nctx.lineCap='round';nctx.lineJoin='round';
+      nctx.beginPath();ds.pts.forEach(([x,y],i)=>i===0?nctx.moveTo(x,y):nctx.lineTo(x,y));nctx.stroke();
+    });
+    if(seg.alpha>=1)segIdx++;
+    return;
+  }
+  ptProgress+=0.8;
+  const pts=seg.pts, endPt=Math.min(Math.floor(ptProgress),pts.length-1);
+  nctx.clearRect(0,0,W,H);
+  drawnSegs.forEach((ds,di) => {
+    if(di>=segIdx||!ds) return;
+    if(ds.isArrow){drawArrowDeco(ds.x,ds.y,ds.angle,ds.size,ds.alpha);return;}
+    nctx.strokeStyle=DEEP_C;nctx.lineWidth=3.2;nctx.lineCap='round';nctx.lineJoin='round';
+    nctx.beginPath();ds.pts.forEach(([x,y],i)=>i===0?nctx.moveTo(x,y):nctx.lineTo(x,y));nctx.stroke();
+  });
+  nctx.strokeStyle=DEEP_C;nctx.lineWidth=3.2;nctx.lineCap='round';nctx.lineJoin='round';
+  nctx.beginPath();
+  for(let i=0;i<=endPt;i++){const [x,y]=pts[i];i===0?nctx.moveTo(x,y):nctx.lineTo(x,y);}
+  nctx.stroke();
+  if(endPt<pts.length-1){const[dx,dy]=pts[endPt];nctx.beginPath();nctx.arc(dx,dy,3,0,Math.PI*2);nctx.fillStyle=ACC_C;nctx.fill();}
+  if(ptProgress>=pts.length-1){drawnSegs[segIdx]=seg;segIdx++;ptProgress=0;}
+}
+setTimeout(animateName,800);
+
+// ── Bird + Branch ──
+const birdCanvas=document.getElementById('bird-canvas');
+const ctx=birdCanvas.getContext('2d');
+const hero=document.querySelector('.hero');
+function resizeCanvas(){birdCanvas.width=hero.offsetWidth;birdCanvas.height=hero.offsetHeight;}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+const COL={body:'#5C3D2E',wing:'#7A5240',belly:'#C4A882',beak:'#D4924A',eye:'#1A0A00',leg:'#C87830'};
+const S=1.0;
+
+function drawBirdStanding(cx,cy,bobOffset,alpha) {
+  ctx.save();ctx.translate(cx,cy+bobOffset);ctx.globalAlpha=alpha;
+  ctx.strokeStyle=COL.leg;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(-3*S,0);ctx.lineTo(-4*S,9*S);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(3*S,0);ctx.lineTo(4*S,9*S);ctx.stroke();
+  ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(-4*S,9*S);ctx.lineTo(-8*S,9*S);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-4*S,9*S);ctx.lineTo(-2*S,12*S);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(4*S,9*S);ctx.lineTo(8*S,9*S);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(4*S,9*S);ctx.lineTo(2*S,12*S);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-6*S,-2*S);ctx.lineTo(-14*S,4*S);ctx.lineTo(-10*S,0);ctx.lineTo(-13*S,-4*S);ctx.closePath();ctx.fillStyle=COL.body;ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,-8*S,7*S,11*S,0.15,0,Math.PI*2);ctx.fillStyle=COL.body;ctx.fill();
+  ctx.beginPath();ctx.ellipse(2*S,-5*S,4*S,7*S,0.2,0,Math.PI*2);ctx.fillStyle=COL.belly;ctx.fill();
+  ctx.beginPath();ctx.ellipse(-1*S,-8*S,6*S,9*S,0.15,0,Math.PI*2);ctx.fillStyle=COL.wing;ctx.fill();
+  ctx.beginPath();ctx.ellipse(1*S,-8*S,5.5*S,9*S,0.1,0,Math.PI*2);ctx.fillStyle=COL.body;ctx.fill();
+  ctx.beginPath();ctx.ellipse(2*S,-5*S,3.5*S,6*S,0.2,0,Math.PI*2);ctx.fillStyle=COL.belly;ctx.fill();
+  ctx.beginPath();ctx.arc(3*S,-19*S,6*S,0,Math.PI*2);ctx.fillStyle=COL.body;ctx.fill();
+  ctx.beginPath();ctx.moveTo(8*S,-19.5*S);ctx.lineTo(15*S,-18*S);ctx.lineTo(8*S,-17.5*S);ctx.closePath();ctx.fillStyle=COL.beak;ctx.fill();
+  ctx.beginPath();ctx.arc(5.5*S,-20.5*S,1.4*S,0,Math.PI*2);ctx.fillStyle=COL.eye;ctx.fill();
+  ctx.beginPath();ctx.arc(6*S,-21*S,0.45*S,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  ctx.restore();
+}
+
+let bobPhase=0;
+function getBranchEnd(){const bW=Math.min(birdCanvas.width*0.38,200);return{x:bW,y:birdCanvas.height*0.30};}
+function drawBranch(){
+  const end=getBranchEnd();
+  ctx.save();ctx.strokeStyle='#7A5240';ctx.lineWidth=6;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(0,end.y+18);ctx.quadraticCurveTo(end.x*0.5,end.y+10,end.x,end.y);ctx.stroke();
+  ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(end.x*0.55,end.y+6);ctx.lineTo(end.x*0.55-10,end.y-18);ctx.stroke();
+  ctx.fillStyle='#7A9A5A';
+  [[end.x*0.55-10,end.y-18],[end.x*0.55-18,end.y-12],[end.x*0.55-4,end.y-22]].forEach(([lx,ly])=>{ctx.beginPath();ctx.ellipse(lx,ly,5,3,-0.5,0,Math.PI*2);ctx.fill();});
+  [[end.x+6,end.y-10],[end.x-8,end.y-14],[end.x+2,end.y-18]].forEach(([lx,ly])=>{ctx.beginPath();ctx.ellipse(lx,ly,6,3.5,-0.4,0,Math.PI*2);ctx.fill();});
+  ctx.restore();
+}
+function birdLoop(){requestAnimationFrame(birdLoop);ctx.clearRect(0,0,birdCanvas.width,birdCanvas.height);bobPhase+=0.035;drawBranch();const end=getBranchEnd();drawBirdStanding(end.x,end.y-12,Math.sin(bobPhase)*1.5,1);}
+birdLoop();
+
+// ── GAME ──
+const gc = document.getElementById('game-canvas');
+const gctx = gc.getContext('2d');
+const gameWrap = document.getElementById('game-wrap');
+const overlay = document.getElementById('game-overlay');
+const scoreEl = document.getElementById('score-val');
+const livesEl = document.getElementById('lives-val');
+const startBtn = document.getElementById('game-start-btn');
+
+const GW = 580, GH = 340;
+gc.width = GW; gc.height = GH;
+
+const GCREAM='#FAF7F2', GWARM='#F0E8DA', GBLUSH='#E8C8B8', GDEEP='#2C1810', GMID='#7A4A38', GACC='#C4785A';
+
+let gScore=0, gLives=3, gRunning=false, gFrame=0;
+let basket={x:GW/2,y:GH-38,w:54,h:18,tx:GW/2};
+let fallers=[];
+let particles=[];
+let mouseX=GW/2;
+let touchActive=false;
+
+// pointer tracking
+gc.addEventListener('mousemove', e=>{
+  const r=gc.getBoundingClientRect();
+  mouseX=(e.clientX-r.left)*(GW/r.width);
+});
+gc.addEventListener('touchmove', e=>{
+  e.preventDefault();
+  const r=gc.getBoundingClientRect();
+  mouseX=(e.touches[0].clientX-r.left)*(GW/r.width);
+},{passive:false});
+
+function spawnFaller() {
+  const isHeart = Math.random() < 0.3;
+  const x = 30 + Math.random()*(GW-60);
+  const speed = 1.8 + gFrame*0.0008 + Math.random()*1.2;
+  fallers.push({x, y:-20, speed, isHeart, angle: Math.random()*Math.PI*2, spin:(Math.random()-0.5)*0.06});
+}
+
+function drawArrowFaller(x,y,angle,size=1) {
+  const len=18*size;
+  gctx.save();
+  gctx.translate(x,y);
+  gctx.rotate(angle);
+  gctx.strokeStyle=GDEEP;
+  gctx.lineWidth=2*size;
+  gctx.lineCap='round';
+  // shaft
+  gctx.beginPath();gctx.moveTo(0,-len);gctx.lineTo(0,len);gctx.stroke();
+  // head
+  gctx.beginPath();gctx.moveTo(0,-len);gctx.lineTo(-5*size,-len+8*size);gctx.moveTo(0,-len);gctx.lineTo(5*size,-len+8*size);gctx.stroke();
+  // fletching
+  gctx.lineWidth=1.5*size;
+  gctx.beginPath();gctx.moveTo(0,len);gctx.lineTo(-5*size,len-8*size);gctx.moveTo(0,len);gctx.lineTo(5*size,len-8*size);gctx.stroke();
+  gctx.restore();
+}
+
+function drawHeartFaller(x,y,size=1) {
+  gctx.save();
+  gctx.translate(x,y);
+  const s=10*size;
+  gctx.fillStyle=GACC;
+  gctx.beginPath();
+  gctx.moveTo(0,s*0.5);
+  gctx.bezierCurveTo(s*1.5,-s*0.5,s*2.5,s*1.5,0,s*2.5);
+  gctx.bezierCurveTo(-s*2.5,s*1.5,-s*1.5,-s*0.5,0,s*0.5);
+  gctx.fill();
+  gctx.restore();
+}
+
+function drawBasket(x,y,w,h) {
+  gctx.save();
+  // basket body
+  gctx.strokeStyle=GDEEP;
+  gctx.lineWidth=2.5;
+  gctx.lineCap='round';
+  gctx.beginPath();
+  gctx.moveTo(x-w/2,y-h/2);
+  gctx.lineTo(x-w/2+4,y+h/2);
+  gctx.lineTo(x+w/2-4,y+h/2);
+  gctx.lineTo(x+w/2,y-h/2);
+  gctx.stroke();
+  // weave lines
+  gctx.lineWidth=1;gctx.strokeStyle=GMID;gctx.globalAlpha=0.4;
+  for(let i=1;i<4;i++){
+    const fy=y-h/2+i*(h/4);
+    const xl=x-w/2+(i*(4/4));
+    const xr=x+w/2-(i*(4/4));
+    gctx.beginPath();gctx.moveTo(xl,fy);gctx.lineTo(xr,fy);gctx.stroke();
+  }
+  // rim
+  gctx.globalAlpha=1;gctx.lineWidth=3;gctx.strokeStyle=GDEEP;
+  gctx.beginPath();gctx.moveTo(x-w/2-2,y-h/2);gctx.lineTo(x+w/2+2,y-h/2);gctx.stroke();
+  gctx.restore();
+}
+
+function spawnParticles(x,y,isHeart) {
+  for(let i=0;i<8;i++) {
+    const angle=Math.random()*Math.PI*2;
+    const speed=1.5+Math.random()*2.5;
+    particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1,life:1,isHeart});
+  }
+}
+
+function updateLivesDisplay() {
+  livesEl.textContent='♡'.repeat(Math.max(0,gLives));
+}
+
+function gameLoop() {
+  if(!gRunning) return;
+  requestAnimationFrame(gameLoop);
+  gFrame++;
+
+  // clear
+  gctx.clearRect(0,0,GW,GH);
+
+  // subtle grid bg
+  gctx.strokeStyle=GBLUSH;gctx.lineWidth=0.5;gctx.globalAlpha=0.3;
+  for(let x=0;x<GW;x+=40){gctx.beginPath();gctx.moveTo(x,0);gctx.lineTo(x,GH);gctx.stroke();}
+  for(let y=0;y<GH;y+=40){gctx.beginPath();gctx.moveTo(0,y);gctx.lineTo(GW,y);gctx.stroke();}
+  gctx.globalAlpha=1;
+
+  // spawn
+  if(gFrame%55===0) spawnFaller();
+  if(gFrame%120===0&&Math.random()<0.4) spawnFaller();
+
+  // move basket toward mouse
+  basket.x+=(mouseX-basket.x)*0.15;
+  basket.x=Math.max(basket.w/2+4,Math.min(GW-basket.w/2-4,basket.x));
+
+  // update fallers
+  fallers=fallers.filter(f=>{
+    f.y+=f.speed;
+    f.angle+=f.spin;
+
+    // catch check
+    const inX=Math.abs(f.x-basket.x)<basket.w/2+6;
+    const inY=f.y>=basket.y-basket.h/2-12&&f.y<=basket.y+basket.h/2;
+    if(inX&&inY) {
+      gScore+=f.isHeart?5:10;
+      scoreEl.textContent=gScore;
+      spawnParticles(f.x,f.y,f.isHeart);
+      return false;
+    }
+    // miss
+    if(f.y>GH+20) {
+      if(!f.isHeart) {
+        gLives--;
+        updateLivesDisplay();
+        if(gLives<=0){endGame();return false;}
+      }
+      return false;
+    }
+    return true;
+  });
+
+  // draw fallers
+  fallers.forEach(f=>{
+    if(f.isHeart) drawHeartFaller(f.x,f.y);
+    else drawArrowFaller(f.x,f.y,f.angle);
+  });
+
+  // particles
+  particles=particles.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life-=0.04;
+    if(p.life<=0)return false;
+    gctx.globalAlpha=p.life;
+    if(p.isHeart){gctx.fillStyle=GACC;gctx.beginPath();gctx.arc(p.x,p.y,3,0,Math.PI*2);gctx.fill();}
+    else{gctx.strokeStyle=GDEEP;gctx.lineWidth=1.5;gctx.beginPath();gctx.moveTo(p.x,p.y-4);gctx.lineTo(p.x,p.y+4);gctx.stroke();}
+    gctx.globalAlpha=1;
+    return true;
+  });
+
+  // basket
+  drawBasket(basket.x,basket.y,basket.w,basket.h);
+
+  // score glow on catch
+}
+
+function startGame() {
+  gScore=0;gLives=3;gFrame=0;fallers=[];particles=[];
+  basket.x=GW/2;mouseX=GW/2;
+  scoreEl.textContent='0';updateLivesDisplay();
+  overlay.style.display='none';
+  gRunning=true;
+  gameLoop();
+}
+
+function endGame() {
+  gRunning=false;
+  overlay.innerHTML=`
+    <h3>you got ${gScore}</h3>
+    <p>${gScore>=100?'ok she ate that ngl 🏹':'not bad, try again'}</p>
+    <button id="game-restart-btn" onclick="startGame()">play again</button>
+  `;
+  overlay.style.display='flex';
+}
+
+startBtn.addEventListener('click', startGame);
+
+// ── EMAILJS CONFIG (replace with your credentials) ──
+const EMAILJS_PUBLIC_KEY  = 'OQmXQ28GdnPX42P1V';
+const EMAILJS_SERVICE_ID  = 'service_4725lem';
+const EMAILJS_TEMPLATE_ID = 'template_d984evj';
+
+// Load EmailJS SDK lazily
+function showSendStatus(msg, color) {
+  let el = document.getElementById('send-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'send-status';
+    el.style.cssText = 'font-size:12px;letter-spacing:0.08em;margin-top:10px;transition:opacity 0.5s;text-align:right;';
+    document.querySelector('.suggest-actions').after(el);
+  }
+  el.style.color = color;
+  el.style.opacity = '1';
+  el.textContent = msg;
+  setTimeout(() => { el.style.opacity = '0'; }, 3000);
+}
+
+function loadEmailJS(cb) {
+  if (window.emailjs) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+  s.onload = () => { emailjs.init(EMAILJS_PUBLIC_KEY); cb(); };
+  document.head.appendChild(s);
+}
+
+// ── SUGGESTION BOX ──
+const suggestInput = document.getElementById('suggest-input');
+const suggestBtn   = document.getElementById('suggest-btn');
+const suggestList  = document.getElementById('suggest-list');
+
+function getSuggestions() {
+  try { return JSON.parse(localStorage.getItem('siham_suggestions')||'[]'); } catch(e){ return []; }
+}
+function saveSuggestions(arr) {
+  localStorage.setItem('siham_suggestions', JSON.stringify(arr));
+}
+
+let historyOpen = false;
+
+function renderSuggestions() {
+  const items = getSuggestions();
+  const countEl = document.getElementById('suggest-count');
+  const toggleWrap = document.getElementById('suggest-history-toggle');
+  const toggleArrow = document.getElementById('toggle-arrow');
+
+  if (countEl) countEl.textContent = items.length;
+
+  if (items.length) {
+    toggleWrap.style.display = 'block';
+  } else {
+    toggleWrap.style.display = 'none';
+    suggestList.style.display = 'none';
+    historyOpen = false;
+  }
+
+  suggestList.innerHTML = '';
+  if (!items.length) return;
+
+  // newest first
+  items.slice().reverse().forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'suggest-item';
+    el.style.animationDelay = (idx * 0.04) + 's';
+    el.innerHTML = `
+      <span class="suggest-item-text">${escHtml(item.text)}</span>
+      <span class="suggest-item-meta">${item.date}</span>
+    `;
+    suggestList.appendChild(el);
+  });
+
+  if (toggleArrow) toggleArrow.style.transform = historyOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+  suggestList.style.display = historyOpen ? 'flex' : 'none';
+}
+
+document.getElementById('toggle-history-btn') && document.getElementById('toggle-history-btn').addEventListener('click', () => {
+  historyOpen = !historyOpen;
+  renderSuggestions();
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function flyingLetter(originEl, onDone) {
+  const rect = originEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'flying-letter';
+  el.style.cssText = `left:${rect.left + rect.width/2 - 30}px;top:${rect.top}px;`;
+
+  // envelope SVG
+  el.innerHTML = `<svg viewBox="0 0 60 44" fill="none" xmlns="http://www.w3.org/2000/svg" width="60" height="44">
+    <rect x="1" y="1" width="58" height="42" rx="5" fill="#FAF7F2" stroke="#C4785A" stroke-width="1.5"/>
+    <polyline points="1,1 30,24 59,1" fill="none" stroke="#C4785A" stroke-width="1.5"/>
+  </svg>`;
+
+  document.body.appendChild(el);
+
+  // animate: rise up + drift right + fade
+  let t = 0;
+  const sx = rect.left + rect.width/2 - 30;
+  const sy = rect.top;
+  const anim = () => {
+    t += 0.018;
+    const x = sx + t * 280 + Math.sin(t*4)*18;
+    const y = sy - t * 320;
+    const rot = t * 40;
+    const alpha = t < 0.6 ? 1 : 1 - (t-0.6)/0.4;
+    el.style.left = x+'px';
+    el.style.top  = y+'px';
+    el.style.transform = `rotate(${rot}deg)`;
+    el.style.opacity = alpha;
+    if (t < 1.0) requestAnimationFrame(anim);
+    else { el.remove(); if(onDone) onDone(); }
+  };
+  requestAnimationFrame(anim);
+}
+
+suggestBtn.addEventListener('click', () => {
+  const text = suggestInput.value.trim();
+  if (!text) return;
+
+  const suggestions = getSuggestions();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  suggestions.push({ text, date: dateStr });
+  saveSuggestions(suggestions);
+  renderSuggestions();
+
+  // fly the letter
+  flyingLetter(suggestBtn, () => {});
+  suggestInput.value = '';
+  historyOpen = true; // auto-open history after sending
+
+  // try emailjs
+  loadEmailJS(() => {
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      suggestion: text,
+      sent_at: new Date().toLocaleString(),
+    }).then(() => {
+      showSendStatus('✓ sent to him', 'var(--accent)');
+    }).catch(err => {
+      console.error('EmailJS error:', err);
+      showSendStatus('✗ email failed — check console', '#E24B4A');
+    });
+  });
+});
+
+renderSuggestions();
+
+// ── CALENDAR ──
+let calYear, calMonth;
+const today = new Date();
+calYear  = today.getFullYear();
+calMonth = today.getMonth();
+
+function getEvents() {
+  try { return JSON.parse(localStorage.getItem('siham_events')||'{}'); } catch(e){ return {}; }
+}
+function saveEvents(obj) { localStorage.setItem('siham_events',JSON.stringify(obj)); }
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function renderCal() {
+  const label = document.getElementById('cal-month-label');
+  label.textContent = MONTHS[calMonth]+' '+calYear;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // day-of-week headers
+  DAYS.forEach(d => {
+    const el = document.createElement('div');
+    el.className='cal-dow'; el.textContent=d;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const events = getEvents();
+
+  for (let i=0;i<firstDay;i++) {
+    const el=document.createElement('div'); el.className='cal-day empty'; grid.appendChild(el);
+  }
+  for (let d=1;d<=daysInMonth;d++) {
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.className='cal-day';
+    el.textContent=d;
+    if (d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear()) el.classList.add('today');
+    if (events[key]&&events[key].length) el.classList.add('has-event');
+    el.addEventListener('click',()=>openModal(key,d));
+    grid.appendChild(el);
+  }
+
+  renderEventListBelow();
+}
+
+function renderEventListBelow() {
+  const events = getEvents();
+  const below = document.getElementById('event-list-below');
+  // show upcoming events for current month
+  const upcoming = [];
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  for(let d=1;d<=daysInMonth;d++){
+    const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(events[key]) events[key].forEach(ev=>upcoming.push({d,key,...ev}));
+  }
+  if(!upcoming.length){below.style.display='none';return;}
+  below.style.display='block';
+  below.innerHTML = '<div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);margin-bottom:10px;opacity:0.7;">this month</div>';
+  upcoming.forEach(ev=>{
+    const chip=document.createElement('span');
+    chip.className='event-chip';
+    chip.innerHTML=`<span class="event-chip-dot" style="background:${ev.color}"></span>${MONTHS[calMonth].slice(0,3)} ${ev.d} — ${escHtml(ev.title)}`;
+    chip.addEventListener('click',()=>openModal(ev.key,ev.d));
+    below.appendChild(chip);
+  });
+}
+
+// modal
+let modalKey = null;
+const modal      = document.getElementById('event-modal');
+const modalLabel = document.getElementById('modal-date-label');
+const titleInput = document.getElementById('event-title');
+const colorSel   = document.getElementById('event-color');
+const saveBtn    = document.getElementById('event-save');
+const cancelBtn  = document.getElementById('event-cancel');
+const deleteBtn  = document.getElementById('event-delete');
+
+function openModal(key, day) {
+  modalKey = key;
+  const [y,m,d] = key.split('-');
+  modalLabel.textContent = `${MONTHS[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+  const events = getEvents();
+  const existing = events[key]&&events[key][0];
+  titleInput.value = existing ? existing.title : '';
+  colorSel.value   = existing ? existing.color : '#C4785A';
+  deleteBtn.style.display = existing ? 'block' : 'none';
+  titleInput.focus();
+  modal.classList.add('open');
+}
+
+function closeModal(){ modal.classList.remove('open'); modalKey=null; }
+
+saveBtn.addEventListener('click',()=>{
+  if(!modalKey) return;
+  const title = titleInput.value.trim();
+  if(!title){closeModal();return;}
+  const events=getEvents();
+  events[modalKey]=[{title,color:colorSel.value}];
+  saveEvents(events);
+  closeModal();
+  renderCal();
+});
+
+cancelBtn.addEventListener('click',closeModal);
+
+deleteBtn.addEventListener('click',()=>{
+  if(!modalKey)return;
+  const events=getEvents();
+  delete events[modalKey];
+  saveEvents(events);
+  closeModal();
+  renderCal();
+});
+
+modal.addEventListener('click',e=>{ if(e.target===modal)closeModal(); });
+
+document.getElementById('cal-prev').addEventListener('click',()=>{
+  calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal();
+});
+document.getElementById('cal-next').addEventListener('click',()=>{
+  calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal();
+});
+
+renderCal();
+
+</script>
+</body>
+</html>
