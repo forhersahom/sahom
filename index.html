@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Siham</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cline x1='16' y1='28' x2='16' y2='4' stroke='%23C4785A' stroke-width='3' stroke-linecap='round'/%3E%3Cpolyline points='9,11 16,4 23,11' fill='none' stroke='%23C4785A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='10,26 16,28 22,26' fill='none' stroke='%23C4785A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, remove, push, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyChql1Kdrd36w9mME9pHMiSfebncQq07gM",
+    authDomain: "sahom-6e01b.firebaseapp.com",
+    databaseURL: "https://sahom-6e01b-default-rtdb.firebaseio.com",
+    projectId: "sahom-6e01b",
+    storageBucket: "sahom-6e01b.firebasestorage.app",
+    messagingSenderId: "304548159104",
+    appId: "1:304548159104:web:11045a5a1f70c81ea01065"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  // ── expose to global scope for rest of script ──
+  window._fb = { db, ref, set, get, onValue, remove, push, update };
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -257,11 +278,33 @@
   .bowl-note-date { font-size:11px;color:var(--mid);opacity:0.6;margin-top:4px;letter-spacing:0.05em; }
   .bowl-empty { font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mid);opacity:0.6;text-align:center;padding:1.5rem 0; }
 
+
+  .list-tabs { display:flex;gap:6px;margin-bottom:1.2rem; }
+  .list-tab {
+    background:none;border:1px solid var(--blush);color:var(--mid);
+    font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
+    padding:5px 14px;border-radius:20px;cursor:pointer;transition:all 0.2s;
+  }
+  .list-tab.active { border-color:var(--accent);color:var(--accent); }
+
 </style>
 </head>
 <body>
 
 <div class="stars" id="stars"></div>
+
+<!-- top message banner -->
+<div id="top-message" style="
+  position:relative;z-index:10;
+  background:var(--warm);
+  border-bottom:1px solid var(--blush);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+">
+  <span style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--deep);line-height:1.5;flex:1;" id="top-msg-text">loading...</span>
+  <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);white-space:nowrap;opacity:0.8;" id="top-msg-date"></span>
+</div>
 <canvas id="bird-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
 
 <section class="hero">
@@ -425,6 +468,28 @@
   </div>
 </div>
 
+
+<!-- ── SHARED LIST ── -->
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<section class="list-section">
+  <span class="section-tag">our list</span>
+  <h2 class="reasons-intro" style="margin-bottom:0.5rem;">things to <em>do</em></h2>
+  <p class="reasons-desc" style="margin-bottom:1.8rem;">date ideas, places, whatever — add stuff here</p>
+  <div class="list-wrap">
+    <div class="list-tabs">
+      <button class="list-tab active" data-filter="all">all</button>
+      <button class="list-tab" data-filter="todo">to do</button>
+      <button class="list-tab" data-filter="done">done</button>
+    </div>
+    <div class="list-add-row">
+      <input type="text" id="list-input" placeholder="add something...">
+      <button id="list-add-btn">+ add</button>
+    </div>
+    <div class="list-items" id="list-items"></div>
+  </div>
+</section>
+
 <div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
 
 <div class="footer" id="footer">
@@ -433,6 +498,12 @@
 </div>
 
 <script>
+
+// ── TOP MESSAGE (edit this whenever you want) ──
+const TOP_MESSAGE = "hey siham — made this for you, hope you like it ♡";
+document.getElementById('top-msg-text').textContent = TOP_MESSAGE;
+document.getElementById('top-msg-date').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'});
+
 // ── Stars ──
 const starsEl = document.getElementById('stars');
 for (let i = 0; i < 60; i++) {
@@ -923,6 +994,13 @@ function getSuggestions() {
 }
 function saveSuggestions(arr) {
   localStorage.setItem('siham_suggestions', JSON.stringify(arr));
+  if (window._fb) {
+    const { db, ref, set } = window._fb;
+    // store as object keyed by index for Firebase
+    const obj = {};
+    arr.forEach((item, i) => { obj['s'+i] = { ...item, ts: item.ts || i }; });
+    set(ref(db, 'suggestions'), obj);
+  }
 }
 
 let historyOpen = false;
@@ -1048,7 +1126,13 @@ calMonth = today.getMonth();
 function getEvents() {
   try { return JSON.parse(localStorage.getItem('siham_events')||'{}'); } catch(e){ return {}; }
 }
-function saveEvents(obj) { localStorage.setItem('siham_events',JSON.stringify(obj)); }
+function saveEvents(obj) {
+  localStorage.setItem('siham_events', JSON.stringify(obj));
+  if (window._fb) {
+    const { db, ref, set } = window._fb;
+    set(ref(db, 'calendar'), obj);
+  }
+}
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -1167,6 +1251,128 @@ document.getElementById('cal-next').addEventListener('click',()=>{
 });
 
 renderCal();
+
+
+});
+
+function renderPastNotes() {
+  const list = document.getElementById('past-notes-list');
+  const all = getAllNotes().filter(n => n.date !== noteTodayKey.replace('note_','') && n.text.trim());
+  list.innerHTML = '';
+  if (!all.length) {
+    list.innerHTML = '<p class="list-empty-msg">no past notes yet</p>';
+    return;
+  }
+  all.forEach(n => {
+    const d = new Date(n.date + 'T12:00:00');
+    const label = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const el = document.createElement('div');
+    el.className = 'past-note-item';
+    el.innerHTML = `<div class="past-note-date">${label}</div><div class="past-note-text">${escHtml(n.text)}</div>`;
+    list.appendChild(el);
+  });
+}
+renderPastNotes();
+
+// ── LIST (Firebase realtime) ──
+let listFilter = 'all';
+let listItems  = {};  // keyed by Firebase push id
+
+function renderList(snapshot) {
+  if (snapshot !== undefined) listItems = snapshot || {};
+  const container = document.getElementById('list-items');
+  container.innerHTML = '';
+  const entries = Object.entries(listItems);
+  const filtered = entries.filter(([,it]) => {
+    if (listFilter === 'todo') return !it.done;
+    if (listFilter === 'done') return it.done;
+    return true;
+  });
+  if (!filtered.length) {
+    container.innerHTML = '<p class="list-empty-msg">nothing here yet</p>';
+    return;
+  }
+  filtered.forEach(([key, item]) => {
+    const el = document.createElement('div');
+    el.className = 'list-item' + (item.done ? ' done' : '');
+    el.innerHTML = `
+      <button class="list-check"><div class="list-check-inner"></div></button>
+      <span class="list-item-text">${escHtml(item.text)}</span>
+      <button class="list-item-del">✕</button>
+    `;
+    el.querySelector('.list-check').addEventListener('click', () => {
+      const { db, ref, update } = window._fb;
+      update(ref(db, 'list/' + key), { done: !item.done });
+    });
+    el.querySelector('.list-item-del').addEventListener('click', () => {
+      const { db, ref, remove } = window._fb;
+      remove(ref(db, 'list/' + key));
+    });
+    container.appendChild(el);
+  });
+}
+
+document.getElementById('list-add-btn').addEventListener('click', addListItem);
+document.getElementById('list-input').addEventListener('keydown', e => { if(e.key==='Enter') addListItem(); });
+
+function addListItem() {
+  const input = document.getElementById('list-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  const { db, ref, push } = window._fb;
+  push(ref(db, 'list'), { text, done: false, ts: Date.now() });
+  input.value = '';
+}
+
+document.querySelectorAll('.list-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    listFilter = tab.dataset.filter;
+    document.querySelectorAll('.list-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    renderList();
+  });
+});
+
+// ── CALENDAR (Firebase) ──
+function loadCalendarFromFirebase() {
+  const { db, ref, onValue } = window._fb;
+  onValue(ref(db, 'calendar'), snap => {
+    const data = snap.val() || {};
+    localStorage.setItem('siham_events', JSON.stringify(data));
+    renderCal();
+  });
+}
+
+const _origSaveEvents = window.saveEvents;
+window.saveEventsFirebase = function(obj) {
+  localStorage.setItem('siham_events', JSON.stringify(obj));
+  const { db, ref, set } = window._fb;
+  set(ref(db, 'calendar'), obj);
+};
+
+// ── SUGGESTIONS (Firebase) ──
+function loadSuggestionsFromFirebase() {
+  const { db, ref, onValue } = window._fb;
+  onValue(ref(db, 'suggestions'), snap => {
+    const data = snap.val() || {};
+    const arr = Object.values(data).sort((a,b) => (a.ts||0)-(b.ts||0));
+    localStorage.setItem('siham_suggestions', JSON.stringify(arr));
+    renderSuggestions();
+  });
+}
+
+window.addEventListener('firebase-ready', () => {
+  const { db, ref, onValue } = window._fb;
+
+  // list — live sync
+  onValue(ref(db, 'list'), snap => renderList(snap.val() || {}));
+
+  // calendar
+  loadCalendarFromFirebase();
+
+  // suggestions
+  loadSuggestionsFromFirebase();
+});
 
 </script>
 </body>
