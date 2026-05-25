@@ -2459,8 +2459,6 @@ renderMemories();
 
 // sync mood from firebase
 window.addEventListener('firebase-ready-stickies', () => {
-  if (!window._fb) return;
-  const { db, ref, onValue } = window._fb;
   if (!window._fb || !window._fb.db) return;
   window._fb.db.ref('mood').on('value', snap => {
     const data = snap.val() || {};
@@ -2475,6 +2473,56 @@ window.addEventListener('firebase-ready-stickies', () => {
     renderMemories();
   });
 });
+
+
+// ── STICKY NOTES ──
+function initSticky(side, textId, saveId, dateId, fbKey) {
+  const textarea = document.getElementById(textId);
+  const saveBtn  = document.getElementById(saveId);
+  const dateEl   = document.getElementById(dateId);
+  if (!textarea || !saveBtn) return;
+
+  // load from localStorage immediately
+  const saved = localStorage.getItem('sticky_' + side);
+  if (saved) {
+    try {
+      const obj = JSON.parse(saved);
+      textarea.value = obj.text || '';
+      if (dateEl && obj.date) dateEl.textContent = obj.date;
+    } catch(e) { textarea.value = saved; }
+  }
+
+  function doSave() {
+    const text = textarea.value.trim();
+    const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const obj  = { text, date };
+    localStorage.setItem('sticky_' + side, JSON.stringify(obj));
+    if (dateEl) dateEl.textContent = date;
+    if (window._fb && window._fb.db) {
+      window._fb.db.ref('stickies/' + fbKey).set(obj);
+    }
+    saveBtn.style.color = 'var(--accent)';
+    setTimeout(() => { saveBtn.style.color = ''; }, 1200);
+  }
+
+  saveBtn.addEventListener('click', doSave);
+  textarea.addEventListener('blur', doSave);
+
+  // live sync from firebase
+  window.addEventListener('firebase-ready-stickies', () => {
+    if (!window._fb || !window._fb.db) return;
+    window._fb.db.ref('stickies/' + fbKey).on('value', snap => {
+      const data = snap.val();
+      if (!data) return;
+      textarea.value = data.text || '';
+      if (dateEl && data.date) dateEl.textContent = data.date;
+      localStorage.setItem('sticky_' + side, JSON.stringify(data));
+    });
+  });
+}
+
+initSticky('left',  'sticky-left-text',  'sticky-left-save',  'sticky-left-date',  'abood-to-siham');
+initSticky('right', 'sticky-right-text', 'sticky-right-save', 'sticky-right-date', 'siham-to-abood');
 
 </script>
 </body>
