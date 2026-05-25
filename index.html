@@ -797,6 +797,92 @@
     color:var(--accent);opacity:0.8;
   }
 
+
+  /* ── mobile sticky notes ── */
+  @media (max-width: 1100px) {
+    .mobile-sticky-bar {
+      position: fixed;
+      bottom: 70px;
+      right: 16px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .mobile-sticky-fab {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--blush);
+      background: var(--warm);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 12px rgba(44,24,16,0.15);
+      transition: transform 0.2s;
+    }
+    .mobile-sticky-fab:hover { transform: scale(1.1); }
+    .mobile-sticky-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 500;
+      background: var(--cream);
+      border-top: 1px solid var(--blush);
+      border-radius: 20px 20px 0 0;
+      padding: 1.4rem;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 -4px 24px rgba(44,24,16,0.12);
+    }
+    .mobile-sticky-panel.open { transform: translateY(0); }
+    .mobile-sticky-panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem;
+    }
+    .mobile-sticky-panel-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 300; color: var(--deep);
+    }
+    .mobile-sticky-close {
+      background: none; border: none; font-size: 1.1rem;
+      cursor: pointer; color: var(--mid);
+    }
+    .mobile-sticky-tabs { display: flex; gap: 8px; margin-bottom: 1rem; }
+    .mobile-sticky-tab {
+      background: none; border: 1px solid var(--blush); color: var(--mid);
+      font-family: 'DM Sans', sans-serif; font-size: 10px;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+    }
+    .mobile-sticky-tab.active { border-color: var(--accent); color: var(--accent); }
+    .mobile-sticky-textarea {
+      width: 100%; min-height: 100px;
+      background: var(--warm); border: 1px solid var(--blush);
+      border-radius: 10px; padding: 12px 14px;
+      font-family: 'Cormorant Garamond', serif; font-size: 1.05rem;
+      color: var(--deep); resize: none; outline: none;
+      transition: border-color 0.2s;
+    }
+    .mobile-sticky-textarea:focus { border-color: var(--accent); }
+    .mobile-sticky-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 10px;
+    }
+    .mobile-sticky-date { font-size: 11px; color: var(--mid); opacity: 0.6; }
+    .mobile-sticky-save {
+      background: none; border: 1px solid var(--accent); color: var(--accent);
+      font-family: 'DM Sans', sans-serif; font-size: 11px;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 7px 18px; border-radius: 40px; cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .mobile-sticky-save:hover { background: var(--accent); color: var(--cream); }
+  }
+  @media (min-width: 1101px) {
+    .mobile-sticky-bar { display: none !important; }
+    .mobile-sticky-panel { display: none !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -2050,17 +2136,15 @@ function initFirebase() {
 }
 
 function loadFirebase() {
-  const sdks = [
-    'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
-    'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js'
-  ];
-  let loaded = 0;
-  sdks.forEach(src => {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = () => { if (++loaded === sdks.length) initFirebase(); };
-    document.head.appendChild(s);
-  });
+  const s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js';
+  s1.onload = () => {
+    const s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js';
+    s2.onload = () => initFirebase();
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
 }
 loadFirebase();
 
@@ -2126,6 +2210,28 @@ setInterval(updateClocks, 1000);
       <button class="jar-modal-close" id="jar-modal-close">✕</button>
     </div>
     <div class="jar-modal-list" id="jar-modal-list"></div>
+  </div>
+</div>
+
+
+<!-- mobile sticky notes -->
+<div class="mobile-sticky-bar">
+  <button class="mobile-sticky-fab" id="mobile-sticky-fab" title="notes">🗒</button>
+</div>
+
+<div class="mobile-sticky-panel" id="mobile-sticky-panel">
+  <div class="mobile-sticky-panel-header">
+    <span class="mobile-sticky-panel-title">sticky notes</span>
+    <button class="mobile-sticky-close" id="mobile-sticky-close">✕</button>
+  </div>
+  <div class="mobile-sticky-tabs">
+    <button class="mobile-sticky-tab active" data-side="left">abood → siham</button>
+    <button class="mobile-sticky-tab" data-side="right">siham → abood</button>
+  </div>
+  <textarea class="mobile-sticky-textarea" id="mobile-sticky-text" placeholder="write something..."></textarea>
+  <div class="mobile-sticky-footer">
+    <span class="mobile-sticky-date" id="mobile-sticky-date"></span>
+    <button class="mobile-sticky-save" id="mobile-sticky-save">save</button>
   </div>
 </div>
 
@@ -2300,235 +2406,4 @@ document.querySelectorAll('.draw-color').forEach(el => {
   el.addEventListener('click', () => {
     document.querySelectorAll('.draw-color').forEach(e=>e.classList.remove('active'));
     el.classList.add('active');
-    drawColor = el.dataset.color;
-    erasing = false;
-    document.getElementById('draw-eraser').style.borderColor = '';
-    document.getElementById('draw-eraser').style.color = '';
-  });
-});
-document.querySelectorAll('.draw-size').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.draw-size').forEach(e=>e.classList.remove('active'));
-    el.classList.add('active');
-    drawSize = parseInt(el.dataset.size);
-  });
-});
-document.getElementById('draw-eraser').addEventListener('click', function() {
-  erasing = !erasing;
-  this.style.borderColor = erasing ? 'var(--accent)' : '';
-  this.style.color = erasing ? 'var(--accent)' : '';
-});
-document.getElementById('draw-clear').addEventListener('click', () => {
-  if (window._fb && window._fb.db) {
-    window._fb.db.ref('drawing/strokes').remove();
-  }
-  dctx.fillStyle = '#FAF7F2';
-  dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
-});
-
-// save = snapshot to firebase as flat image + email notification
-document.getElementById('draw-save-btn').addEventListener('click', () => {
-  const btn = document.getElementById('draw-save-btn');
-  btn.textContent = 'saved ✓';
-  setTimeout(() => btn.textContent = 'save drawing', 1500);
-  sendEmail('🎨 canvas update', 'The shared drawing canvas was updated on ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'}));
-});
-
-// ── MEMORY JAR ──
-function getMemories() {
-  try { return JSON.parse(localStorage.getItem('siham_memories')||'[]'); } catch(e){ return []; }
-}
-function saveMemories(arr) {
-  localStorage.setItem('siham_memories', JSON.stringify(arr));
-  if (window._fb && window._fb.db) {
-    const obj = {};
-    arr.forEach((m,i) => obj['m'+i] = m);
-    window._fb.db.ref('memories').set(obj);
-  }
-}
-function renderMemories() {
-  const mems = getMemories();
-  // update count on jar
-  const countEl = document.getElementById('jar-count');
-  if (countEl) countEl.textContent = mems.length ? mems.length + ' memor' + (mems.length===1?'y':'ies') + ' · tap to open' : 'tap to add memories';
-}
-
-function openJarModal() {
-  const mems = getMemories();
-  const list = document.getElementById('jar-modal-list');
-  list.innerHTML = '';
-  if (!mems.length) {
-    list.innerHTML = '<p class="jar-modal-empty">the jar is empty — add your first memory below</p>';
-  } else {
-    mems.slice().reverse().forEach((m, i) => {
-      const div = document.createElement('div');
-      div.className = 'jar-modal-item';
-      div.style.animationDelay = (i * 0.05) + 's';
-      div.innerHTML = `
-        <div class="jar-modal-text">${escHtml(m.text)}</div>
-        <div class="jar-modal-meta">
-          <span class="jar-modal-date">${m.date}</span>
-          <span class="jar-modal-by">${m.who}</span>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-  }
-  document.getElementById('jar-modal').classList.add('open');
-}
-
-document.getElementById('jar-visual').addEventListener('click', openJarModal);
-document.getElementById('jar-modal-close').addEventListener('click', () => document.getElementById('jar-modal').classList.remove('open'));
-document.getElementById('jar-modal').addEventListener('click', e => { if (e.target === document.getElementById('jar-modal')) document.getElementById('jar-modal').classList.remove('open'); });
-
-let jarWho = 'abood';
-document.querySelectorAll('.jar-who-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.jar-who-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    jarWho = btn.dataset.who;
-  });
-});
-
-document.getElementById('jar-submit').addEventListener('click', () => {
-  const text = document.getElementById('jar-input').value.trim();
-  if (!text) return;
-  const mems = getMemories();
-  mems.push({
-    text,
-    who: jarWho,
-    date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
-  });
-  saveMemories(mems);
-  sendEmail('🫙 new memory', 'From ' + jarWho + ': ' + text);
-  document.getElementById('jar-input').value = '';
-  renderMemories();
-  flyPaperToJar();
-});
-
-function flyPaperToJar() {
-  const jarEl  = document.getElementById('jar-visual');
-  const submitEl = document.getElementById('jar-submit');
-  const jarRect  = jarEl.getBoundingClientRect();
-  const srcRect  = submitEl.getBoundingClientRect();
-
-  const paper = document.createElement('div');
-  paper.className = 'flying-paper';
-  paper.style.cssText = `left:${srcRect.left + srcRect.width/2 - 18}px;top:${srcRect.top}px;`;
-  paper.innerHTML = `<svg viewBox="0 0 36 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="1" y="1" width="34" height="26" rx="3" fill="#FAF7F2" stroke="#C4785A" stroke-width="1.5"/>
-    <line x1="7" y1="9"  x2="29" y2="9"  stroke="#C4785A" stroke-width="1" opacity="0.5"/>
-    <line x1="7" y1="14" x2="25" y2="14" stroke="#C4785A" stroke-width="1" opacity="0.5"/>
-    <line x1="7" y1="19" x2="22" y2="19" stroke="#C4785A" stroke-width="1" opacity="0.5"/>
-  </svg>`;
-  document.body.appendChild(paper);
-
-  const tx = jarRect.left + jarRect.width/2 - 18;
-  const ty = jarRect.top + jarRect.height * 0.5;
-  const sx = srcRect.left + srcRect.width/2 - 18;
-  const sy = srcRect.top;
-
-  let t = 0;
-  const anim = () => {
-    t += 0.025;
-    const ease = t < 1 ? t * t * (3 - 2*t) : 1;
-    const x = sx + (tx - sx) * ease + Math.sin(t * Math.PI * 2) * 20;
-    const y = sy + (ty - sy) * ease - Math.sin(t * Math.PI) * 60;
-    const rot = t * 360;
-    const scale = 1 - t * 0.7;
-    const alpha = t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2;
-    paper.style.left = x + 'px';
-    paper.style.top  = y + 'px';
-    paper.style.transform = `rotate(${rot}deg) scale(${scale})`;
-    paper.style.opacity = alpha;
-    if (t < 1) requestAnimationFrame(anim);
-    else {
-      paper.remove();
-      // shake jar
-      const jar = document.getElementById('jar-visual');
-      jar.style.transform = 'scale(1.1) rotate(-3deg)';
-      setTimeout(() => { jar.style.transform = 'scale(1.05) rotate(2deg)'; }, 100);
-      setTimeout(() => { jar.style.transform = ''; }, 220);
-    }
-  };
-  requestAnimationFrame(anim);
-}
-
-
-renderMemories();
-
-// sync mood from firebase
-window.addEventListener('firebase-ready-stickies', () => {
-  if (!window._fb || !window._fb.db) return;
-  window._fb.db.ref('mood').on('value', snap => {
-    const data = snap.val() || {};
-    if (data.siham) localStorage.setItem('siham_mood_siham', JSON.stringify(data.siham));
-    if (data.abood) localStorage.setItem('siham_mood_abood', JSON.stringify(data.abood));
-    updateMoodDisplay();
-  });
-  window._fb.db.ref('memories').on('value', snap => {
-    const data = snap.val() || {};
-    const arr = Object.values(data);
-    localStorage.setItem('siham_memories', JSON.stringify(arr));
-    renderMemories();
-  });
-});
-
-
-// ── STICKY NOTES ──
-function initSticky(side, textId, saveId, dateId, fbKey) {
-  const textarea = document.getElementById(textId);
-  const saveBtn  = document.getElementById(saveId);
-  const dateEl   = document.getElementById(dateId);
-  if (!textarea || !saveBtn) return;
-
-  // load from localStorage immediately
-  const saved = localStorage.getItem('sticky_' + side);
-  if (saved) {
-    try {
-      const obj = JSON.parse(saved);
-      textarea.value = obj.text || '';
-      if (dateEl && obj.date) dateEl.textContent = obj.date;
-    } catch(e) { textarea.value = saved; }
-  }
-
-  function doSave() {
-    const text = textarea.value.trim();
-    const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    const obj  = { text, date };
-    localStorage.setItem('sticky_' + side, JSON.stringify(obj));
-    if (dateEl) dateEl.textContent = date;
-    if (window._fb && window._fb.db) {
-      window._fb.db.ref('stickies/' + fbKey).set(obj);
-    }
-    saveBtn.style.color = 'var(--accent)';
-    setTimeout(() => { saveBtn.style.color = ''; }, 1200);
-  }
-
-  saveBtn.addEventListener('click', () => {
-    doSave();
-    if (fbKey === 'siham-to-abood') {
-      sendEmail('📝 sticky note update', 'Siham updated her note: ' + textarea.value.trim());
-    }
-  });
-  textarea.addEventListener('blur', doSave);
-
-  // live sync from firebase
-  window.addEventListener('firebase-ready-stickies', () => {
-    if (!window._fb || !window._fb.db) return;
-    window._fb.db.ref('stickies/' + fbKey).on('value', snap => {
-      const data = snap.val();
-      if (!data) return;
-      textarea.value = data.text || '';
-      if (dateEl && data.date) dateEl.textContent = data.date;
-      localStorage.setItem('sticky_' + side, JSON.stringify(data));
-    });
-  });
-}
-
-initSticky('left',  'sticky-left-text',  'sticky-left-save',  'sticky-left-date',  'abood-to-siham');
-initSticky('right', 'sticky-right-text', 'sticky-right-save', 'sticky-right-date', 'siham-to-abood');
-
-</script>
-</body>
-</html>
+    drawColor = el.data
