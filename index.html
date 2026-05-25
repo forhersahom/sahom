@@ -703,11 +703,6 @@
   }
   .draw-save-btn:hover { background:var(--accent);color:var(--cream); }
   .draw-hint { font-size:11px;color:var(--mid);opacity:0.5;letter-spacing:0.05em; }
-  .draw-saved-gallery { padding:14px 16px;border-top:1px solid var(--blush);display:none; }
-  .draw-saved-gallery.show { display:block; }
-  .draw-gallery-label { font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid);opacity:0.6;margin-bottom:10px; }
-  .draw-gallery-grid { display:flex;gap:8px;flex-wrap:wrap; }
-  .draw-thumb { width:70px;height:70px;border-radius:8px;border:1px solid var(--blush);object-fit:cover;cursor:pointer;transition:transform 0.15s; }
   .draw-thumb:hover { transform:scale(1.05); }
 
   /* ── memory jar ── */
@@ -894,8 +889,7 @@
   <div class="suggest-box">
     <textarea id="suggest-input" placeholder="write whatever's on your mind..."></textarea>
     <div class="suggest-actions">
-      <span style="font-size:11px;color:var(--mid);opacity:0.6;letter-spacing:0.05em;">This like a hotline to send him something immediately!</span>
-      </span>
+      <span style="font-size:11px;color:var(--mid);opacity:0.6;letter-spacing:0.05em;">saved locally + sent to him</span>
       <button class="suggest-submit" id="suggest-btn">send it ↗</button>
     </div>
   </div>
@@ -1061,13 +1055,10 @@
     </div>
     <canvas id="draw-canvas" height="300"></canvas>
     <div class="draw-footer">
-      <span class="draw-hint">draw anything ✦</span>
+      <span class="draw-hint">strokes sync live ✦</span>
       <button class="draw-save-btn" id="draw-save-btn">save drawing</button>
     </div>
-    <div class="draw-saved-gallery" id="draw-gallery">
-      <div class="draw-gallery-label">saved drawings</div>
-      <div class="draw-gallery-grid" id="draw-gallery-grid"></div>
-    </div>
+
   </div>
 </section>
 
@@ -2212,16 +2203,18 @@ function updateMoodDisplay() {
 }
 updateMoodDisplay();
 
-// ── DRAWING CANVAS ──
+// ── DRAWING CANVAS (shared, Firebase-backed) ──
 const drawCanvas = document.getElementById('draw-canvas');
 const dctx = drawCanvas.getContext('2d');
-drawCanvas.width = drawCanvas.offsetWidth || 580;
+drawCanvas.width  = drawCanvas.offsetWidth || 580;
 
 let drawing = false;
 let drawColor = '#2C1810';
 let drawSize  = 3;
 let erasing   = false;
 let lastX = 0, lastY = 0;
+let strokeBuffer = []; // collect points of current stroke
+let applyingRemote = false; // flag to avoid echo
 
 function getPos(e) {
   const r = drawCanvas.getBoundingClientRect();
@@ -2231,14 +2224,43 @@ function getPos(e) {
   return [(src.clientX - r.left) * scaleX, (src.clientY - r.top) * scaleY];
 }
 
+// Fill background
 dctx.fillStyle = '#FAF7F2';
 dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
 
-drawCanvas.addEventListener('mousedown',  e => { drawing=true; [lastX,lastY]=getPos(e); });
-drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; [lastX,lastY]=getPos(e); }, {passive:false});
-drawCanvas.addEventListener('mouseup',   () => { drawing=false; dctx.beginPath(); });
-drawCanvas.addEventListener('touchend',  () => { drawing=false; dctx.beginPath(); });
-drawCanvas.addEventListener('mouseleave',() => { drawing=false; });
+function applyStroke(stroke) {
+  if (!stroke.pts || stroke.pts.length < 2) return;
+  dctx.beginPath();
+  dctx.moveTo(stroke.pts[0][0], stroke.pts[0][1]);
+  for (let i = 1; i < stroke.pts.length; i++) dctx.lineTo(stroke.pts[i][0], stroke.pts[i][1]);
+  dctx.strokeStyle = stroke.color;
+  dctx.lineWidth   = stroke.size;
+  dctx.lineCap = 'round';
+  dctx.lineJoin = 'round';
+  dctx.stroke();
+}
+
+// Load all strokes from Firebase and redraw
+function redrawAllStrokes(strokes) {
+  dctx.fillStyle = '#FAF7F2';
+  dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+  Object.values(strokes || {}).sort((a,b)=>(a.ts||0)-(b.ts||0)).forEach(applyStroke);
+}
+
+// Start listening once Firebase is ready
+window.addEventListener('firebase-ready-stickies', () => {
+  if (!window._fb || !window._fb.db) return;
+  window._fb.db.ref('drawing/strokes').on('value', snap => {
+    const data = snap.val() || {};
+    redrawAllStrokes(data);
+  });
+});
+
+drawCanvas.addEventListener('mousedown',  e => { drawing=true; strokeBuffer=[]; [lastX,lastY]=getPos(e); strokeBuffer.push([lastX,lastY]); });
+drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; strokeBuffer=[]; [lastX,lastY]=getPos(e); strokeBuffer.push([lastX,lastY]); }, {passive:false});
+drawCanvas.addEventListener('mouseup',   () => { if(drawing) finishStroke(); drawing=false; });
+drawCanvas.addEventListener('touchend',  () => { if(drawing) finishStroke(); drawing=false; });
+drawCanvas.addEventListener('mouseleave',() => { if(drawing) finishStroke(); drawing=false; });
 
 function drawStroke(e) {
   if (!drawing) return;
@@ -2249,10 +2271,25 @@ function drawStroke(e) {
   dctx.lineTo(x, y);
   dctx.strokeStyle = erasing ? '#FAF7F2' : drawColor;
   dctx.lineWidth   = erasing ? drawSize * 4 : drawSize;
-  dctx.lineCap = 'round';
-  dctx.lineJoin = 'round';
+  dctx.lineCap = 'round'; dctx.lineJoin = 'round';
   dctx.stroke();
+  strokeBuffer.push([x, y]);
   [lastX, lastY] = [x, y];
+}
+
+function finishStroke() {
+  if (!strokeBuffer.length) return;
+  const stroke = {
+    pts: strokeBuffer,
+    color: erasing ? '#FAF7F2' : drawColor,
+    size: erasing ? drawSize * 4 : drawSize,
+    ts: Date.now()
+  };
+  // push to Firebase
+  if (window._fb && window._fb.db) {
+    window._fb.db.ref('drawing/strokes').push(stroke);
+  }
+  strokeBuffer = [];
 }
 
 drawCanvas.addEventListener('mousemove', drawStroke);
@@ -2282,44 +2319,19 @@ document.getElementById('draw-eraser').addEventListener('click', function() {
   this.style.color = erasing ? 'var(--accent)' : '';
 });
 document.getElementById('draw-clear').addEventListener('click', () => {
+  if (window._fb && window._fb.db) {
+    window._fb.db.ref('drawing/strokes').remove();
+  }
   dctx.fillStyle = '#FAF7F2';
   dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
 });
 
-// save drawing
-const drawGallery = document.getElementById('draw-gallery');
-const drawGalleryGrid = document.getElementById('draw-gallery-grid');
-
-function loadDrawings() {
-  try { return JSON.parse(localStorage.getItem('siham_drawings')||'[]'); } catch(e){ return []; }
-}
-function renderDrawings() {
-  const drawings = loadDrawings();
-  if (!drawings.length) { drawGallery.classList.remove('show'); return; }
-  drawGallery.classList.add('show');
-  drawGalleryGrid.innerHTML = '';
-  drawings.slice().reverse().forEach(d => {
-    const img = document.createElement('img');
-    img.className = 'draw-thumb';
-    img.src = d.data;
-    img.title = d.date;
-    drawGalleryGrid.appendChild(img);
-  });
-}
-renderDrawings();
-
+// save = snapshot to firebase as flat image + email notification
 document.getElementById('draw-save-btn').addEventListener('click', () => {
-  const data = drawCanvas.toDataURL('image/png');
-  const drawings = loadDrawings();
-  drawings.push({ data, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}) });
-  if (drawings.length > 12) drawings.shift(); // keep last 12
-  localStorage.setItem('siham_drawings', JSON.stringify(drawings));
-  renderDrawings();
-  // flash feedback
   const btn = document.getElementById('draw-save-btn');
   btn.textContent = 'saved ✓';
   setTimeout(() => btn.textContent = 'save drawing', 1500);
-  sendEmail('🎨 new drawing', 'Siham saved a new drawing on ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'}));
+  sendEmail('🎨 canvas update', 'The shared drawing canvas was updated on ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'}));
 });
 
 // ── MEMORY JAR ──
