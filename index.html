@@ -513,6 +513,10 @@
   body.dark .hero { color:#F0E8DA; }
   body.dark #name-canvas { filter: invert(1) sepia(0.2) brightness(1.1); }
   body.dark .distance-badge { color:#D4885A; }
+  body.dark .clock-time { color:#F0E8DA; }
+  body.dark .clock-city { color:#C4A882; }
+  body.dark .clock-diff { color:#D4885A; }
+  body.dark .clock-separator { color:#3A2820; }
   body.dark .hero-sub { color:#C4A882; }
   body.dark .scroll-hint span { color:#C4A882; }
 
@@ -742,6 +746,62 @@
   }
   .jar-who-btn.active { border-color:var(--accent);color:var(--accent);background:var(--cream); }
 
+
+  /* ── jar paper animation ── */
+  .flying-paper {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    width: 36px; height: 28px;
+  }
+  @keyframes paperFly {
+    0%   { opacity:1; transform: rotate(0deg) scale(1); }
+    60%  { opacity:1; transform: rotate(180deg) scale(0.7); }
+    100% { opacity:0; transform: rotate(280deg) scale(0.2); }
+  }
+
+  /* ── jar modal ── */
+  #jar-modal {
+    position:fixed;inset:0;z-index:1000;display:none;
+    align-items:center;justify-content:center;
+    background:rgba(44,24,16,0.45);backdrop-filter:blur(6px);
+    padding:1rem;
+  }
+  #jar-modal.open { display:flex; }
+  .jar-modal-box {
+    background:var(--cream);border-radius:20px;
+    width:100%;max-width:460px;max-height:78vh;
+    border:1px solid var(--blush);
+    display:flex;flex-direction:column;
+    animation:fadeUp 0.3s ease;overflow:hidden;
+  }
+  .jar-modal-header {
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1.4rem 1.6rem;border-bottom:1px solid var(--blush);flex-shrink:0;
+  }
+  .jar-modal-header h3 { font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:var(--deep); }
+  .jar-modal-close { background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--mid); }
+  .jar-modal-list { overflow-y:auto;padding:1rem 1.4rem;display:flex;flex-direction:column;gap:10px; }
+  .jar-modal-item {
+    background:var(--warm);border:1px solid var(--blush);border-radius:12px;
+    padding:14px 16px;animation:fadeUp 0.3s ease;
+  }
+  .jar-modal-text { font-family:'Cormorant Garamond',serif;font-size:1.08rem;color:var(--deep);line-height:1.6; }
+  .jar-modal-meta { display:flex;justify-content:space-between;margin-top:6px; }
+  .jar-modal-date { font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);opacity:0.55; }
+  .jar-modal-by   { font-size:10px;color:var(--accent);letter-spacing:0.08em; }
+  .jar-modal-empty { font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mid);opacity:0.5;text-align:center;padding:2rem; }
+
+  /* jar clickable */
+  .jar-visual { cursor:pointer;transition:transform 0.2s; }
+  .jar-visual:hover { transform:scale(1.06); }
+  .jar-visual svg { filter:drop-shadow(0 4px 12px rgba(196,120,90,0.18)); }
+  .jar-count {
+    text-align:center;margin-top:4px;
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--accent);opacity:0.8;
+  }
+
 </style>
 </head>
 <body>
@@ -834,7 +894,8 @@
   <div class="suggest-box">
     <textarea id="suggest-input" placeholder="write whatever's on your mind..."></textarea>
     <div class="suggest-actions">
-      <span style="font-size:11px;color:var(--mid);opacity:0.6;letter-spacing:0.05em;">saved locally + sent to him</span>
+      <span style="font-size:11px;color:var(--mid);opacity:0.6;letter-spacing:0.05em;">This like a hotline to send him something immediately!</span>
+      </span>
       <button class="suggest-submit" id="suggest-btn">send it ↗</button>
     </div>
   </div>
@@ -961,7 +1022,7 @@
 <section class="mood-section">
   <span class="section-tag">mood check</span>
   <h2 class="reasons-intro" style="margin-bottom:0.5rem;">how are you <em>feeling?</em></h2>
-  <p class="reasons-desc" style="margin-bottom:0;">pick one — he'll see it</p>
+  <p class="reasons-desc" style="margin-bottom:0;">pick one — i'll see it</p>
   <div class="mood-wrap">
     <div class="mood-grid" id="mood-grid"></div>
     <div class="mood-display" id="mood-display">
@@ -982,7 +1043,7 @@
 <section class="draw-section">
   <span class="section-tag">for you</span>
   <h2 class="reasons-intro" style="margin-bottom:0.5rem;">draw <em>something</em></h2>
-  <p class="reasons-desc" style="margin-bottom:1.8rem;">leave her a doodle, she can draw one back</p>
+  <p class="reasons-desc" style="margin-bottom:1.8rem;">i made this canvas so we can doodle here</p>
   <div class="draw-wrap">
     <div class="draw-toolbar">
       <div class="draw-color active" data-color="#2C1810" style="background:#2C1810;"></div>
@@ -1023,11 +1084,11 @@
       <path d="M15 22 Q10 60 12 95 Q14 112 45 112 Q76 112 78 95 Q80 60 75 22 Z" fill="#FAF7F2" stroke="#C4785A" stroke-width="1.5"/>
       <path d="M15 22 Q10 50 12 70" stroke="#E8C8B8" stroke-width="1" fill="none"/>
       <ellipse cx="45" cy="22" rx="30" ry="7" fill="#F0E8DA" stroke="#C4785A" stroke-width="1.5"/>
-      <!-- little folded papers inside -->
       <rect x="28" y="55" width="18" height="12" rx="2" fill="#C4785A" opacity="0.3" transform="rotate(-8 28 55)"/>
       <rect x="44" y="65" width="16" height="11" rx="2" fill="#C4785A" opacity="0.25" transform="rotate(5 44 65)"/>
       <rect x="33" y="78" width="20" height="12" rx="2" fill="#C4785A" opacity="0.2" transform="rotate(-3 33 78)"/>
     </svg>
+    <div class="jar-count" id="jar-count"></div>
   </div>
 
   <div class="jar-input-wrap">
@@ -1039,7 +1100,7 @@
     <button class="jar-submit" id="jar-submit">add to jar ✦</button>
     <div style="clear:both;"></div>
   </div>
-  <div class="jar-memories" id="jar-memories"></div>
+
 </section>
 
 <div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
@@ -1081,9 +1142,8 @@ function getReasons() {
 }
 function saveReasons(arr) {
   localStorage.setItem('siham_reasons', JSON.stringify(arr));
-  if (window._fb) {
-    const { db, ref, set } = window._fb;
-    set(ref(db, 'reasons'), arr);
+  if (window._fb && window._fb.db) {
+    window._fb.db.ref('reasons').set(arr);
   }
 }
 
@@ -1642,12 +1702,10 @@ function getSuggestions() {
 }
 function saveSuggestions(arr) {
   localStorage.setItem('siham_suggestions', JSON.stringify(arr));
-  if (window._fb) {
-    const { db, ref, set } = window._fb;
-    // store as object keyed by index for Firebase
+  if (window._fb && window._fb.db) {
     const obj = {};
     arr.forEach((item, i) => { obj['s'+i] = { ...item, ts: item.ts || i }; });
-    set(ref(db, 'suggestions'), obj);
+    window._fb.db.ref('suggestions').set(obj);
   }
 }
 
@@ -1776,9 +1834,8 @@ function getEvents() {
 }
 function saveEvents(obj) {
   localStorage.setItem('siham_events', JSON.stringify(obj));
-  if (window._fb) {
-    const { db, ref, set } = window._fb;
-    set(ref(db, 'calendar'), obj);
+  if (window._fb && window._fb.db) {
+    window._fb.db.ref('calendar').set(obj);
   }
 }
 
@@ -1928,12 +1985,10 @@ function renderList(snapshot) {
       <button class="list-item-del">✕</button>
     `;
     el.querySelector('.list-check').addEventListener('click', () => {
-      const { db, ref, update } = window._fb;
-      update(ref(db, 'list/' + key), { done: !item.done });
+      if (window._fb && window._fb.db) window._fb.db.ref('list/' + key).update({ done: !item.done });
     });
     el.querySelector('.list-item-del').addEventListener('click', () => {
-      const { db, ref, remove } = window._fb;
-      remove(ref(db, 'list/' + key));
+      if (window._fb && window._fb.db) window._fb.db.ref('list/' + key).remove();
     });
     container.appendChild(el);
   });
@@ -1954,8 +2009,9 @@ function addListItem() {
   const input = document.getElementById('list-input');
   const text  = input.value.trim();
   if (!text) return;
-  const { db, ref, push } = window._fb;
-  push(ref(db, 'list'), { text, done: false, ts: Date.now() });
+  if (window._fb && window._fb.db) {
+    window._fb.db.ref('list').push({ text, done: false, ts: Date.now() });
+  }
   input.value = '';
 }
 
@@ -1972,11 +2028,8 @@ document.querySelectorAll('.list-tab').forEach(tab => {
 
 // ── SUGGESTIONS (Firebase) ──
 
-// ── FIREBASE init via dynamic import ──
-Promise.all([
-  import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
-  import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js')
-]).then(([{ initializeApp }, { getDatabase, ref, set, get, onValue, remove, push, update }]) => {
+// ── FIREBASE init via compat SDK ──
+function initFirebase() {
   const firebaseConfig = {
     apiKey: "AIzaSyChql1Kdrd36w9mME9pHMiSfebncQq07gM",
     authDomain: "sahom-6e01b.firebaseapp.com",
@@ -1986,32 +2039,40 @@ Promise.all([
     messagingSenderId: "304548159104",
     appId: "1:304548159104:web:11045a5a1f70c81ea01065"
   };
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-  window._fb = { db, ref, set, get, onValue, remove, push, update };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  window._fb = { db };
 
-  // list — live sync
-  onValue(ref(db, 'list'), snap => renderList(snap.val() || {}));
-
-  // calendar — live sync
-  onValue(ref(db, 'calendar'), snap => {
+  db.ref('list').on('value', snap => renderList(snap.val() || {}));
+  db.ref('calendar').on('value', snap => {
     const data = snap.val() || {};
     localStorage.setItem('siham_events', JSON.stringify(data));
     renderCal();
   });
-
-  // stickies — live sync
-  window.dispatchEvent(new Event('firebase-ready-stickies'));
-
-  // suggestions — live sync
-  onValue(ref(db, 'suggestions'), snap => {
+  db.ref('suggestions').on('value', snap => {
     const data = snap.val() || {};
     const arr = Object.values(data).sort((a,b) => (a.ts||0)-(b.ts||0));
     localStorage.setItem('siham_suggestions', JSON.stringify(arr));
     renderSuggestions();
   });
+  window.dispatchEvent(new Event('firebase-ready-stickies'));
+}
 
-}).catch(err => console.warn('Firebase failed to load:', err));
+function loadFirebase() {
+  const sdks = [
+    'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js'
+  ];
+  let loaded = 0;
+  sdks.forEach(src => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => { if (++loaded === sdks.length) initFirebase(); };
+    document.head.appendChild(s);
+  });
+}
+loadFirebase();
+
 
 
 
@@ -2066,6 +2127,17 @@ setInterval(updateClocks, 1000);
   </div>
 </div>
 
+
+<div id="jar-modal">
+  <div class="jar-modal-box">
+    <div class="jar-modal-header">
+      <h3>our memories 🫙</h3>
+      <button class="jar-modal-close" id="jar-modal-close">✕</button>
+    </div>
+    <div class="jar-modal-list" id="jar-modal-list"></div>
+  </div>
+</div>
+
 <button id="dark-toggle">🌙</button>
 <script>
   (function() {
@@ -2108,9 +2180,8 @@ MOODS.forEach(m => {
     // we don't know who's who so save under 'current_mood' and let both see
     const obj = { emoji: m.emoji, label: m.label, ts: Date.now() };
     localStorage.setItem('siham_mood_siham', JSON.stringify(obj));
-    if (window._fb) {
-      const { db, ref, set } = window._fb;
-      set(ref(db, 'mood/siham'), obj);
+    if (window._fb && window._fb.db) {
+      window._fb.db.ref('mood/siham').set(obj);
     }
     updateMoodDisplay();
     sendEmail('💭 mood update', 'Siham is feeling: ' + m.emoji + ' ' + m.label);
@@ -2257,34 +2328,46 @@ function getMemories() {
 }
 function saveMemories(arr) {
   localStorage.setItem('siham_memories', JSON.stringify(arr));
-  if (window._fb) {
-    const { db, ref, set } = window._fb;
+  if (window._fb && window._fb.db) {
     const obj = {};
     arr.forEach((m,i) => obj['m'+i] = m);
-    set(ref(db, 'memories'), obj);
+    window._fb.db.ref('memories').set(obj);
   }
 }
 function renderMemories() {
-  const el = document.getElementById('jar-memories');
   const mems = getMemories();
-  el.innerHTML = '';
-  if (!mems.length) {
-    el.innerHTML = '<p class="jar-empty">the jar is empty — add your first memory</p>';
-    return;
-  }
-  mems.slice().reverse().forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'jar-memory';
-    div.innerHTML = `
-      <div class="jar-memory-text">${escHtml(m.text)}</div>
-      <div class="jar-memory-meta">
-        <span class="jar-memory-date">${m.date}</span>
-        <span class="jar-memory-by">${m.who}</span>
-      </div>
-    `;
-    el.appendChild(div);
-  });
+  // update count on jar
+  const countEl = document.getElementById('jar-count');
+  if (countEl) countEl.textContent = mems.length ? mems.length + ' memor' + (mems.length===1?'y':'ies') + ' · tap to open' : 'tap to add memories';
 }
+
+function openJarModal() {
+  const mems = getMemories();
+  const list = document.getElementById('jar-modal-list');
+  list.innerHTML = '';
+  if (!mems.length) {
+    list.innerHTML = '<p class="jar-modal-empty">the jar is empty — add your first memory below</p>';
+  } else {
+    mems.slice().reverse().forEach((m, i) => {
+      const div = document.createElement('div');
+      div.className = 'jar-modal-item';
+      div.style.animationDelay = (i * 0.05) + 's';
+      div.innerHTML = `
+        <div class="jar-modal-text">${escHtml(m.text)}</div>
+        <div class="jar-modal-meta">
+          <span class="jar-modal-date">${m.date}</span>
+          <span class="jar-modal-by">${m.who}</span>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('jar-modal').classList.add('open');
+}
+
+document.getElementById('jar-visual').addEventListener('click', openJarModal);
+document.getElementById('jar-modal-close').addEventListener('click', () => document.getElementById('jar-modal').classList.remove('open'));
+document.getElementById('jar-modal').addEventListener('click', e => { if (e.target === document.getElementById('jar-modal')) document.getElementById('jar-modal').classList.remove('open'); });
 
 let jarWho = 'abood';
 document.querySelectorAll('.jar-who-btn').forEach(btn => {
@@ -2308,11 +2391,57 @@ document.getElementById('jar-submit').addEventListener('click', () => {
   sendEmail('🫙 new memory', 'From ' + jarWho + ': ' + text);
   document.getElementById('jar-input').value = '';
   renderMemories();
-  // little jar bounce
-  const jar = document.getElementById('jar-visual');
-  jar.style.transform = 'scale(1.08)';
-  setTimeout(() => jar.style.transform = '', 300);
+  flyPaperToJar();
 });
+
+function flyPaperToJar() {
+  const jarEl  = document.getElementById('jar-visual');
+  const submitEl = document.getElementById('jar-submit');
+  const jarRect  = jarEl.getBoundingClientRect();
+  const srcRect  = submitEl.getBoundingClientRect();
+
+  const paper = document.createElement('div');
+  paper.className = 'flying-paper';
+  paper.style.cssText = `left:${srcRect.left + srcRect.width/2 - 18}px;top:${srcRect.top}px;`;
+  paper.innerHTML = `<svg viewBox="0 0 36 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="34" height="26" rx="3" fill="#FAF7F2" stroke="#C4785A" stroke-width="1.5"/>
+    <line x1="7" y1="9"  x2="29" y2="9"  stroke="#C4785A" stroke-width="1" opacity="0.5"/>
+    <line x1="7" y1="14" x2="25" y2="14" stroke="#C4785A" stroke-width="1" opacity="0.5"/>
+    <line x1="7" y1="19" x2="22" y2="19" stroke="#C4785A" stroke-width="1" opacity="0.5"/>
+  </svg>`;
+  document.body.appendChild(paper);
+
+  const tx = jarRect.left + jarRect.width/2 - 18;
+  const ty = jarRect.top + jarRect.height * 0.5;
+  const sx = srcRect.left + srcRect.width/2 - 18;
+  const sy = srcRect.top;
+
+  let t = 0;
+  const anim = () => {
+    t += 0.025;
+    const ease = t < 1 ? t * t * (3 - 2*t) : 1;
+    const x = sx + (tx - sx) * ease + Math.sin(t * Math.PI * 2) * 20;
+    const y = sy + (ty - sy) * ease - Math.sin(t * Math.PI) * 60;
+    const rot = t * 360;
+    const scale = 1 - t * 0.7;
+    const alpha = t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2;
+    paper.style.left = x + 'px';
+    paper.style.top  = y + 'px';
+    paper.style.transform = `rotate(${rot}deg) scale(${scale})`;
+    paper.style.opacity = alpha;
+    if (t < 1) requestAnimationFrame(anim);
+    else {
+      paper.remove();
+      // shake jar
+      const jar = document.getElementById('jar-visual');
+      jar.style.transform = 'scale(1.1) rotate(-3deg)';
+      setTimeout(() => { jar.style.transform = 'scale(1.05) rotate(2deg)'; }, 100);
+      setTimeout(() => { jar.style.transform = ''; }, 220);
+    }
+  };
+  requestAnimationFrame(anim);
+}
+
 
 renderMemories();
 
@@ -2320,13 +2449,14 @@ renderMemories();
 window.addEventListener('firebase-ready-stickies', () => {
   if (!window._fb) return;
   const { db, ref, onValue } = window._fb;
-  onValue(ref(db, 'mood'), snap => {
+  if (!window._fb || !window._fb.db) return;
+  window._fb.db.ref('mood').on('value', snap => {
     const data = snap.val() || {};
     if (data.siham) localStorage.setItem('siham_mood_siham', JSON.stringify(data.siham));
     if (data.abood) localStorage.setItem('siham_mood_abood', JSON.stringify(data.abood));
     updateMoodDisplay();
   });
-  onValue(ref(db, 'memories'), snap => {
+  window._fb.db.ref('memories').on('value', snap => {
     const data = snap.val() || {};
     const arr = Object.values(data);
     localStorage.setItem('siham_memories', JSON.stringify(arr));
