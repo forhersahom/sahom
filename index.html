@@ -2505,7 +2505,12 @@ function initSticky(side, textId, saveId, dateId, fbKey) {
     setTimeout(() => { saveBtn.style.color = ''; }, 1200);
   }
 
-  saveBtn.addEventListener('click', doSave);
+  saveBtn.addEventListener('click', () => {
+    doSave();
+    if (fbKey === 'siham-to-abood') {
+      sendEmail('📝 sticky note update', 'Siham updated her note: ' + textarea.value.trim());
+    }
+  });
   textarea.addEventListener('blur', doSave);
 
   // live sync from firebase
