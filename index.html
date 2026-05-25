@@ -2120,19 +2120,9 @@ function initFirebase() {
   const db = firebase.database();
   window._fb = { db };
 
-  db.ref('list').on('value', snap => renderList(snap.val() || {}));
-  db.ref('calendar').on('value', snap => {
-    const data = snap.val() || {};
-    localStorage.setItem('siham_events', JSON.stringify(data));
-    renderCal();
-  });
-  db.ref('suggestions').on('value', snap => {
-    const data = snap.val() || {};
-    const arr = Object.values(data).sort((a,b) => (a.ts||0)-(b.ts||0));
-    localStorage.setItem('siham_suggestions', JSON.stringify(arr));
-    renderSuggestions();
-  });
+  // fire connectAllFirebase which sets up all listeners
   window.dispatchEvent(new Event('firebase-ready-stickies'));
+  if (typeof connectAllFirebase === 'function') connectAllFirebase();
 }
 
 function loadFirebase() {
@@ -2354,13 +2344,70 @@ function redrawAllStrokes(strokes) {
 }
 
 // Start listening once Firebase is ready
-window.addEventListener('firebase-ready-stickies', () => {
+function connectAllFirebase() {
   if (!window._fb || !window._fb.db) return;
+
+  // drawing
   window._fb.db.ref('drawing/strokes').on('value', snap => {
-    const data = snap.val() || {};
-    redrawAllStrokes(data);
+    redrawAllStrokes(snap.val() || {});
   });
-});
+
+  // reasons
+  window._fb.db.ref('reasons').on('value', snap => {
+    const data = snap.val();
+    if (!data) return;
+    localStorage.setItem('siham_reasons', JSON.stringify(data));
+    renderReasons();
+  });
+
+  // mood + memories
+  window._fb.db.ref('mood').on('value', snap => {
+    const data = snap.val() || {};
+    if (data.siham) localStorage.setItem('siham_mood_siham', JSON.stringify(data.siham));
+    if (data.abood) localStorage.setItem('siham_mood_abood', JSON.stringify(data.abood));
+    updateMoodDisplay();
+  });
+  window._fb.db.ref('memories').on('value', snap => {
+    const data = snap.val() || {};
+    const arr = Object.values(data);
+    localStorage.setItem('siham_memories', JSON.stringify(arr));
+    renderMemories();
+  });
+
+  // stickies desktop
+  ['abood-to-siham','siham-to-abood'].forEach(fbKey => {
+    const side = fbKey === 'abood-to-siham' ? 'left' : 'right';
+    window._fb.db.ref('stickies/' + fbKey).on('value', snap => {
+      const data = snap.val();
+      if (!data) return;
+      localStorage.setItem('sticky_' + side, JSON.stringify(data));
+      const ta = document.getElementById('sticky-' + side + '-text');
+      const de = document.getElementById('sticky-' + side + '-date');
+      if (ta) ta.value = data.text || '';
+      if (de && data.date) de.textContent = data.date;
+    });
+  });
+
+  // list
+  window._fb.db.ref('list').on('value', snap => renderList(snap.val() || {}));
+
+  // calendar
+  window._fb.db.ref('calendar').on('value', snap => {
+    const data = snap.val() || {};
+    localStorage.setItem('siham_events', JSON.stringify(data));
+    renderCal();
+  });
+
+  // suggestions
+  window._fb.db.ref('suggestions').on('value', snap => {
+    const data = snap.val() || {};
+    const arr = Object.values(data).sort((a,b) => (a.ts||0)-(b.ts||0));
+    localStorage.setItem('siham_suggestions', JSON.stringify(arr));
+    renderSuggestions();
+  });
+}
+
+window.addEventListener('firebase-ready-stickies', connectAllFirebase);
 
 drawCanvas.addEventListener('mousedown',  e => { drawing=true; strokeBuffer=[]; [lastX,lastY]=getPos(e); strokeBuffer.push([lastX,lastY]); });
 drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; strokeBuffer=[]; [lastX,lastY]=getPos(e); strokeBuffer.push([lastX,lastY]); }, {passive:false});
@@ -2406,4 +2453,300 @@ document.querySelectorAll('.draw-color').forEach(el => {
   el.addEventListener('click', () => {
     document.querySelectorAll('.draw-color').forEach(e=>e.classList.remove('active'));
     el.classList.add('active');
-    drawColor = el.data
+    drawColor = el.dataset.color;
+    erasing = false;
+    document.getElementById('draw-eraser').style.borderColor = '';
+    document.getElementById('draw-eraser').style.color = '';
+  });
+});
+document.querySelectorAll('.draw-size').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.draw-size').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+    drawSize = parseInt(el.dataset.size);
+  });
+});
+document.getElementById('draw-eraser').addEventListener('click', function() {
+  erasing = !erasing;
+  this.style.borderColor = erasing ? 'var(--accent)' : '';
+  this.style.color = erasing ? 'var(--accent)' : '';
+});
+document.getElementById('draw-clear').addEventListener('click', () => {
+  if (window._fb && window._fb.db) {
+    window._fb.db.ref('drawing/strokes').remove();
+  }
+  dctx.fillStyle = '#FAF7F2';
+  dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+});
+
+// save = snapshot to firebase as flat image + email notification
+document.getElementById('draw-save-btn').addEventListener('click', () => {
+  const btn = document.getElementById('draw-save-btn');
+  btn.textContent = 'saved ✓';
+  setTimeout(() => btn.textContent = 'save drawing', 1500);
+  sendEmail('🎨 canvas update', 'The shared drawing canvas was updated on ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'}));
+});
+
+// ── MEMORY JAR ──
+function getMemories() {
+  try { return JSON.parse(localStorage.getItem('siham_memories')||'[]'); } catch(e){ return []; }
+}
+function saveMemories(arr) {
+  localStorage.setItem('siham_memories', JSON.stringify(arr));
+  if (window._fb && window._fb.db) {
+    const obj = {};
+    arr.forEach((m,i) => obj['m'+i] = m);
+    window._fb.db.ref('memories').set(obj);
+  }
+}
+function renderMemories() {
+  const mems = getMemories();
+  // update count on jar
+  const countEl = document.getElementById('jar-count');
+  if (countEl) countEl.textContent = mems.length ? mems.length + ' memor' + (mems.length===1?'y':'ies') + ' · tap to open' : 'tap to add memories';
+}
+
+function openJarModal() {
+  const mems = getMemories();
+  const list = document.getElementById('jar-modal-list');
+  list.innerHTML = '';
+  if (!mems.length) {
+    list.innerHTML = '<p class="jar-modal-empty">the jar is empty — add your first memory below</p>';
+  } else {
+    mems.slice().reverse().forEach((m, i) => {
+      const div = document.createElement('div');
+      div.className = 'jar-modal-item';
+      div.style.animationDelay = (i * 0.05) + 's';
+      div.innerHTML = `
+        <div class="jar-modal-text">${escHtml(m.text)}</div>
+        <div class="jar-modal-meta">
+          <span class="jar-modal-date">${m.date}</span>
+          <span class="jar-modal-by">${m.who}</span>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('jar-modal').classList.add('open');
+}
+
+document.getElementById('jar-visual').addEventListener('click', openJarModal);
+document.getElementById('jar-modal-close').addEventListener('click', () => document.getElementById('jar-modal').classList.remove('open'));
+document.getElementById('jar-modal').addEventListener('click', e => { if (e.target === document.getElementById('jar-modal')) document.getElementById('jar-modal').classList.remove('open'); });
+
+let jarWho = 'abood';
+document.querySelectorAll('.jar-who-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.jar-who-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    jarWho = btn.dataset.who;
+  });
+});
+
+document.getElementById('jar-submit').addEventListener('click', () => {
+  const text = document.getElementById('jar-input').value.trim();
+  if (!text) return;
+  const mems = getMemories();
+  mems.push({
+    text,
+    who: jarWho,
+    date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+  });
+  saveMemories(mems);
+  sendEmail('🫙 new memory', 'From ' + jarWho + ': ' + text);
+  document.getElementById('jar-input').value = '';
+  renderMemories();
+  flyPaperToJar();
+});
+
+function flyPaperToJar() {
+  const jarEl  = document.getElementById('jar-visual');
+  const submitEl = document.getElementById('jar-submit');
+  const jarRect  = jarEl.getBoundingClientRect();
+  const srcRect  = submitEl.getBoundingClientRect();
+
+  const paper = document.createElement('div');
+  paper.className = 'flying-paper';
+  paper.style.cssText = `left:${srcRect.left + srcRect.width/2 - 18}px;top:${srcRect.top}px;`;
+  paper.innerHTML = `<svg viewBox="0 0 36 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="34" height="26" rx="3" fill="#FAF7F2" stroke="#C4785A" stroke-width="1.5"/>
+    <line x1="7" y1="9"  x2="29" y2="9"  stroke="#C4785A" stroke-width="1" opacity="0.5"/>
+    <line x1="7" y1="14" x2="25" y2="14" stroke="#C4785A" stroke-width="1" opacity="0.5"/>
+    <line x1="7" y1="19" x2="22" y2="19" stroke="#C4785A" stroke-width="1" opacity="0.5"/>
+  </svg>`;
+  document.body.appendChild(paper);
+
+  const tx = jarRect.left + jarRect.width/2 - 18;
+  const ty = jarRect.top + jarRect.height * 0.5;
+  const sx = srcRect.left + srcRect.width/2 - 18;
+  const sy = srcRect.top;
+
+  let t = 0;
+  const anim = () => {
+    t += 0.025;
+    const ease = t < 1 ? t * t * (3 - 2*t) : 1;
+    const x = sx + (tx - sx) * ease + Math.sin(t * Math.PI * 2) * 20;
+    const y = sy + (ty - sy) * ease - Math.sin(t * Math.PI) * 60;
+    const rot = t * 360;
+    const scale = 1 - t * 0.7;
+    const alpha = t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2;
+    paper.style.left = x + 'px';
+    paper.style.top  = y + 'px';
+    paper.style.transform = `rotate(${rot}deg) scale(${scale})`;
+    paper.style.opacity = alpha;
+    if (t < 1) requestAnimationFrame(anim);
+    else {
+      paper.remove();
+      // shake jar
+      const jar = document.getElementById('jar-visual');
+      jar.style.transform = 'scale(1.1) rotate(-3deg)';
+      setTimeout(() => { jar.style.transform = 'scale(1.05) rotate(2deg)'; }, 100);
+      setTimeout(() => { jar.style.transform = ''; }, 220);
+    }
+  };
+  requestAnimationFrame(anim);
+}
+
+
+renderMemories();
+
+// mood + memories handled in connectAllFirebase
+
+
+// ── STICKY NOTES ──
+function initSticky(side, textId, saveId, dateId, fbKey) {
+  const textarea = document.getElementById(textId);
+  const saveBtn  = document.getElementById(saveId);
+  const dateEl   = document.getElementById(dateId);
+  if (!textarea || !saveBtn) return;
+
+  // load from localStorage immediately
+  const saved = localStorage.getItem('sticky_' + side);
+  if (saved) {
+    try {
+      const obj = JSON.parse(saved);
+      textarea.value = obj.text || '';
+      if (dateEl && obj.date) dateEl.textContent = obj.date;
+    } catch(e) { textarea.value = saved; }
+  }
+
+  function doSave() {
+    const text = textarea.value.trim();
+    const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const obj  = { text, date };
+    localStorage.setItem('sticky_' + side, JSON.stringify(obj));
+    if (dateEl) dateEl.textContent = date;
+    if (window._fb && window._fb.db) {
+      window._fb.db.ref('stickies/' + fbKey).set(obj);
+    }
+    saveBtn.style.color = 'var(--accent)';
+    setTimeout(() => { saveBtn.style.color = ''; }, 1200);
+  }
+
+  saveBtn.addEventListener('click', () => {
+    doSave();
+    if (fbKey === 'siham-to-abood') {
+      sendEmail('📝 sticky note update', 'Siham updated her note: ' + textarea.value.trim());
+    }
+  });
+  textarea.addEventListener('blur', doSave);
+
+  // live sync from firebase
+  window.addEventListener('firebase-ready-stickies', () => {
+    if (!window._fb || !window._fb.db) return;
+    window._fb.db.ref('stickies/' + fbKey).on('value', snap => {
+      const data = snap.val();
+      if (!data) return;
+      textarea.value = data.text || '';
+      if (dateEl && data.date) dateEl.textContent = data.date;
+      localStorage.setItem('sticky_' + side, JSON.stringify(data));
+    });
+  });
+}
+
+initSticky('left',  'sticky-left-text',  'sticky-left-save',  'sticky-left-date',  'abood-to-siham');
+initSticky('right', 'sticky-right-text', 'sticky-right-save', 'sticky-right-date', 'siham-to-abood');
+
+
+// ── MOBILE STICKY NOTES ──
+(function() {
+  const fab     = document.getElementById('mobile-sticky-fab');
+  const panel   = document.getElementById('mobile-sticky-panel');
+  const closeBtn= document.getElementById('mobile-sticky-close');
+  const textarea= document.getElementById('mobile-sticky-text');
+  const saveBtn = document.getElementById('mobile-sticky-save');
+  const dateEl  = document.getElementById('mobile-sticky-date');
+  const tabs    = document.querySelectorAll('.mobile-sticky-tab');
+  if (!fab) return;
+
+  let currentSide = 'left';
+  const fbKeys = { left: 'abood-to-siham', right: 'siham-to-abood' };
+
+  function loadSide(side) {
+    currentSide = side;
+    const saved = localStorage.getItem('sticky_' + side);
+    if (saved) {
+      try {
+        const obj = JSON.parse(saved);
+        textarea.value = obj.text || '';
+        if (dateEl && obj.date) dateEl.textContent = obj.date;
+        else dateEl.textContent = '';
+      } catch(e) { textarea.value = ''; }
+    } else {
+      textarea.value = '';
+      dateEl.textContent = '';
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadSide(tab.dataset.side);
+    });
+  });
+
+  fab.addEventListener('click', () => {
+    loadSide(currentSide);
+    panel.classList.add('open');
+  });
+  closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+
+  saveBtn.addEventListener('click', () => {
+    const text = textarea.value.trim();
+    const date = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const obj  = { text, date };
+    localStorage.setItem('sticky_' + currentSide, JSON.stringify(obj));
+    if (dateEl) dateEl.textContent = date;
+    if (window._fb && window._fb.db) {
+      window._fb.db.ref('stickies/' + fbKeys[currentSide]).set(obj);
+    }
+    if (currentSide === 'right') {
+      sendEmail('📝 sticky note update', 'Siham updated her note: ' + text);
+    }
+    saveBtn.textContent = 'saved ✓';
+    setTimeout(() => saveBtn.textContent = 'save', 1200);
+  });
+
+  // sync from firebase
+  window.addEventListener('firebase-ready-stickies', () => {
+    if (!window._fb || !window._fb.db) return;
+    ['left','right'].forEach(side => {
+      window._fb.db.ref('stickies/' + fbKeys[side]).on('value', snap => {
+        const data = snap.val();
+        if (!data) return;
+        localStorage.setItem('sticky_' + side, JSON.stringify(data));
+        if (side === currentSide && panel.classList.contains('open')) {
+          textarea.value = data.text || '';
+          if (dateEl && data.date) dateEl.textContent = data.date;
+        }
+      });
+    });
+  });
+
+  loadSide('left');
+})();
+
+</script>
+</body>
+</html>
