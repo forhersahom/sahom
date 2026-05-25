@@ -335,24 +335,419 @@
     color:var(--mid);opacity:0.6;display:flex;justify-content:space-between;
   }
 
+
+  /* ── sticky notes ── */
+  .sticky-note {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    z-index: 50;
+    pointer-events: auto;
+  }
+  .sticky-note.left  { left: 16px; }
+  .sticky-note.right { right: 16px; }
+
+  @media (max-width: 1100px) {
+    .sticky-note { display: none; }
+  }
+
+  .sticky-inner {
+    background: #FEFCE8;
+    border: 1px solid #E8D88A;
+    border-radius: 3px;
+    padding: 14px 14px 20px;
+    box-shadow: 2px 3px 12px rgba(44,24,16,0.10), 0 1px 2px rgba(44,24,16,0.06);
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .sticky-note.right .sticky-inner {
+    background: #FEF0F0;
+    border-color: #F0C8C8;
+  }
+  .sticky-inner:hover {
+    box-shadow: 3px 5px 18px rgba(44,24,16,0.15);
+    transform: rotate(0deg) scale(1.02);
+  }
+  .sticky-note.left  .sticky-inner { transform: rotate(-1.5deg); }
+  .sticky-note.left  .sticky-inner:hover { transform: rotate(0deg) scale(1.02); }
+  .sticky-note.right .sticky-inner { transform: rotate(1.5deg); }
+  .sticky-note.right .sticky-inner:hover { transform: rotate(0deg) scale(1.02); }
+
+  .sticky-pin {
+    position: absolute;
+    top: -10px; left: 50%; transform: translateX(-50%);
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 1px 4px rgba(44,24,16,0.25);
+    z-index: 2;
+  }
+  .sticky-note.right .sticky-pin { background: #C47A7A; }
+
+  .sticky-from {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mid);
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+  .sticky-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--deep);
+    line-height: 1.6;
+    word-break: break-word;
+    min-height: 60px;
+    outline: none;
+    width: 100%;
+    border: none;
+    background: none;
+    resize: none;
+    padding: 0;
+    cursor: text;
+  }
+  .sticky-text::placeholder { color: var(--mid); opacity: 0.4; }
+  .sticky-save {
+    position: absolute;
+    bottom: 7px; right: 10px;
+    background: none; border: none;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--mid); opacity: 0; cursor: pointer;
+    transition: opacity 0.2s, color 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .sticky-inner:hover .sticky-save,
+  .sticky-text:focus ~ .sticky-save { opacity: 0.6; }
+  .sticky-save:hover { opacity: 1 !important; color: var(--accent); }
+  .sticky-date {
+    font-size: 9px; color: var(--mid); opacity: 0.45;
+    margin-top: 6px; font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+
+  /* ── reasons edit mode ── */
+  .reason-card.is-new::before {
+    content: '✦ new';
+    position: absolute;
+    top: 8px; left: 10px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    opacity: 0.9;
+  }
+  .reason-card.revealed.is-new::before { color: var(--blush); }
+  .reason-updated {
+    position: absolute;
+    bottom: 8px; left: 10px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--mid);
+    opacity: 0.45;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .reason-card.revealed .reason-updated { color: var(--blush); opacity: 0.5; }
+
+  .edit-mode-indicator {
+    display: none;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    align-items: center;
+    gap: 8px;
+  }
+  .edit-mode-indicator.show { display: flex; }
+  .edit-mode-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  .reason-edit-input {
+    width: 100%;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--accent);
+    outline: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--deep);
+    text-align: center;
+    padding: 4px 0;
+    line-height: 1.4;
+  }
+  .edit-done-btn {
+    margin-top: 1.2rem;
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 7px 20px;
+    border-radius: 40px;
+    cursor: pointer;
+    display: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .edit-done-btn:hover { background: var(--accent); color: var(--cream); }
+  .edit-done-btn.show { display: inline-flex; }
+
+
+
+
+  /* ── dark mode ── */
+  body.dark { background:#1C1410; color:#F0E8DA; }
+  body.dark .hero { color:#F0E8DA; }
+  body.dark #name-canvas { filter: invert(1) sepia(0.2) brightness(1.1); }
+  body.dark .distance-badge { color:#D4885A; }
+  body.dark .hero-sub { color:#C4A882; }
+  body.dark .scroll-hint span { color:#C4A882; }
+
+  body.dark .letter-body { color:#F0E8DA; }
+  body.dark .letter-sig { color:#D4885A; }
+  body.dark .section-tag { color:#D4885A; }
+
+  body.dark .divider-line { background:#3A2820; }
+  body.dark .divider-dot { background:#D4885A; }
+
+  body.dark .reason-card { background:#241A16; border-color:#3A2820; }
+  body.dark .reason-card:hover { border-color:#D4885A; }
+  body.dark .reason-lock { color:#C4A882; }
+  body.dark .reason-num { color:#D4885A; }
+  body.dark .reason-card.revealed { background:#F0E8DA; border-color:#F0E8DA; }
+  body.dark .reason-card.revealed .reason-text { color:#1C1410; }
+  body.dark .reason-card.revealed .reason-num { color:#7A4A38; }
+
+  body.dark .suggest-box { background:#241A16; border-color:#3A2820; }
+  body.dark #suggest-input { background:#1C1410; border-color:#3A2820; color:#F0E8DA; }
+  body.dark .suggest-item { background:#241A16; border-color:#3A2820; color:#F0E8DA; }
+  body.dark .suggest-item-text { color:#F0E8DA; }
+
+  body.dark .cal-wrap { background:#241A16; border-color:#3A2820; }
+  body.dark .cal-header { border-color:#3A2820; }
+  body.dark .cal-day { color:#F0E8DA; }
+  body.dark .cal-day:hover { background:#3A2820; }
+  body.dark .cal-day.today { background:#3A2820; }
+  body.dark .event-list-below { border-color:#3A2820; }
+  body.dark .event-chip { background:#1C1410; border-color:#3A2820; color:#F0E8DA; }
+  body.dark .event-modal-box { background:#1C1410; border-color:#3A2820; }
+  body.dark #event-title, body.dark #event-color { background:#241A16; border-color:#3A2820; color:#F0E8DA; }
+
+  body.dark .list-wrap { background:#241A16; border-color:#3A2820; }
+  body.dark .list-item { background:#1C1410; border-color:#3A2820; }
+  body.dark .list-item:hover { background:#241A16; }
+  body.dark .list-item-text { color:#F0E8DA; }
+  body.dark #list-input { background:#1C1410; color:#F0E8DA; }
+  body.dark .list-add-row { border-color:#3A2820; }
+  body.dark #list-add-btn { border-color:#3A2820; }
+  body.dark .list-count-bar { border-color:#3A2820; }
+
+  body.dark .bowl-modal-box { background:#1C1410; border-color:#3A2820; }
+  body.dark .bowl-note { background:#241A16; border-color:#3A2820; }
+  body.dark .bowl-note-text { color:#F0E8DA; }
+  body.dark #bowl-modal { background:rgba(10,6,4,0.6); }
+
+  body.dark .reasons-intro { color:#F0E8DA; }
+  body.dark .reasons-desc { color:#C4A882; }
+  body.dark .reasons-intro em { color:#D4885A; }
+
+  body.dark .sticky-inner { background:#2A1E18; border-color:#3A2820; }
+  body.dark .sticky-note.right .sticky-inner { background:#261616; border-color:#3A2020; }
+  body.dark .sticky-text { color:#F0E8DA; }
+  body.dark .sticky-from { color:#C4A882; }
+  body.dark .sticky-date { color:#C4A882; }
+
+  body.dark .game-wrap { background:#241A16; border-color:#3A2820; }
+  body.dark #game-overlay { background:rgba(28,20,16,0.92); }
+
+  body.dark .footer-heart { color:#D4885A; }
+  body.dark .footer-note { color:#C4A882; }
+
+  body.dark #top-message { background:#241A16; border-color:#3A2820; }
+
+  /* toggle btn */
+  #dark-toggle {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 9999;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--warm);
+    border: 1px solid var(--blush);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    box-shadow: 0 2px 14px rgba(44,24,16,0.18);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #dark-toggle:hover { transform: scale(1.12); box-shadow: 0 4px 20px rgba(44,24,16,0.28); }
+  body.dark #dark-toggle { background:#241A16; border-color:#3A2820; }
+
+
+  /* ── timezone clocks ── */
+  .clocks-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    margin-top: 1.8rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.3s forwards;
+  }
+  .clock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .clock-city {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mid);
+    opacity: 0.7;
+  }
+  .clock-time {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--deep);
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+  .clock-separator {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--blush);
+    align-self: center;
+    margin-top: 14px;
+  }
+  .clock-diff {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+  }
+
+
+  /* ── mood picker ── */
+  .mood-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .mood-wrap { background:var(--warm);border:1px solid var(--blush);border-radius:20px;padding:2rem; }
+  .mood-grid { display:flex;flex-wrap:wrap;gap:10px;margin-top:1.4rem; }
+  .mood-btn {
+    background:var(--cream);border:1px solid var(--blush);border-radius:40px;
+    padding:9px 18px;cursor:pointer;font-size:14px;
+    font-family:'DM Sans',sans-serif;letter-spacing:0.04em;color:var(--deep);
+    transition:all 0.2s;display:flex;align-items:center;gap:7px;
+  }
+  .mood-btn:hover { border-color:var(--accent);transform:translateY(-1px); }
+  .mood-btn.selected { background:var(--deep);border-color:var(--deep);color:var(--cream); }
+  body.dark .mood-btn.selected { background:var(--accent);border-color:var(--accent); }
+  .mood-display {
+    margin-top:1.6rem;padding:1.2rem 1.4rem;
+    background:var(--cream);border:1px solid var(--blush);border-radius:14px;
+    display:none;
+  }
+  .mood-display.show { display:block; }
+  .mood-display-her { font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--deep);line-height:1.6; }
+  .mood-display-time { font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);opacity:0.6;margin-top:6px; }
+  .mood-his-wrap { margin-top:1rem;padding-top:1rem;border-top:1px solid var(--blush); }
+  .mood-his-label { font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid);opacity:0.6;margin-bottom:8px; }
+  .mood-his-val { font-size:1.4rem; }
+
+  /* ── drawing canvas ── */
+  .draw-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .draw-wrap { border:1px solid var(--blush);border-radius:20px;overflow:hidden;background:var(--warm); }
+  .draw-toolbar {
+    display:flex;align-items:center;gap:10px;padding:12px 16px;
+    border-bottom:1px solid var(--blush);flex-wrap:wrap;
+  }
+  .draw-color { width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.15s,border-color 0.15s;flex-shrink:0; }
+  .draw-color.active { border-color:var(--deep);transform:scale(1.2); }
+  .draw-size {
+    background:none;border:1px solid var(--blush);color:var(--mid);
+    font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+    padding:5px 12px;border-radius:20px;cursor:pointer;transition:all 0.2s;
+  }
+  .draw-size.active { border-color:var(--accent);color:var(--accent); }
+  .draw-spacer { flex:1; }
+  .draw-action {
+    background:none;border:1px solid var(--blush);color:var(--mid);
+    font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+    padding:5px 14px;border-radius:20px;cursor:pointer;transition:all 0.2s;
+  }
+  .draw-action:hover { border-color:var(--accent);color:var(--accent); }
+  #draw-canvas { display:block;width:100%;cursor:crosshair;touch-action:none; }
+  .draw-footer { padding:10px 16px;border-top:1px solid var(--blush);display:flex;justify-content:space-between;align-items:center; }
+  .draw-save-btn {
+    background:none;border:1px solid var(--accent);color:var(--accent);
+    font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
+    padding:7px 18px;border-radius:40px;cursor:pointer;transition:background 0.2s,color 0.2s;
+  }
+  .draw-save-btn:hover { background:var(--accent);color:var(--cream); }
+  .draw-hint { font-size:11px;color:var(--mid);opacity:0.5;letter-spacing:0.05em; }
+  .draw-saved-gallery { padding:14px 16px;border-top:1px solid var(--blush);display:none; }
+  .draw-saved-gallery.show { display:block; }
+  .draw-gallery-label { font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid);opacity:0.6;margin-bottom:10px; }
+  .draw-gallery-grid { display:flex;gap:8px;flex-wrap:wrap; }
+  .draw-thumb { width:70px;height:70px;border-radius:8px;border:1px solid var(--blush);object-fit:cover;cursor:pointer;transition:transform 0.15s; }
+  .draw-thumb:hover { transform:scale(1.05); }
+
+  /* ── memory jar ── */
+  .jar-section { position:relative;z-index:1;padding:6rem 2rem;max-width:640px;margin:0 auto; }
+  .jar-input-wrap { background:var(--warm);border:1px solid var(--blush);border-radius:16px;padding:2rem;margin-bottom:1.4rem; }
+  .jar-input-wrap textarea {
+    width:100%;min-height:80px;background:var(--cream);border:1px solid var(--blush);
+    border-radius:10px;padding:12px 14px;font-family:'Cormorant Garamond',serif;font-size:1.05rem;
+    color:var(--deep);resize:none;outline:none;transition:border-color 0.2s;
+  }
+  .jar-input-wrap textarea:focus { border-color:var(--accent); }
+  .jar-input-wrap textarea::placeholder { color:var(--mid);opacity:0.5; }
+  .jar-submit {
+    margin-top:10px;float:right;
+    background:none;border:1px solid var(--accent);color:var(--accent);
+    font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;
+    padding:8px 20px;border-radius:40px;cursor:pointer;transition:background 0.2s,color 0.2s;
+  }
+  .jar-submit:hover { background:var(--accent);color:var(--cream); }
+  .jar-visual { display:flex;justify-content:center;margin:1rem 0; cursor:pointer; }
+  .jar-memories { display:flex;flex-direction:column;gap:10px;margin-top:1rem; }
+  .jar-memory {
+    background:var(--warm);border:1px solid var(--blush);border-radius:12px;
+    padding:14px 16px;animation:fadeUp 0.4s ease;position:relative;
+  }
+  .jar-memory-text { font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--deep);line-height:1.6; }
+  .jar-memory-meta { display:flex;justify-content:space-between;align-items:center;margin-top:6px; }
+  .jar-memory-date { font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mid);opacity:0.55; }
+  .jar-memory-by { font-size:10px;color:var(--accent);letter-spacing:0.08em; }
+  .jar-empty { font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mid);opacity:0.5;text-align:center;padding:1.5rem 0;font-size:1rem; }
+  .jar-who { display:flex;gap:8px;margin-bottom:12px; }
+  .jar-who-btn {
+    background:none;border:1px solid var(--blush);color:var(--mid);
+    font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;
+    padding:5px 14px;border-radius:20px;cursor:pointer;transition:all 0.2s;
+  }
+  .jar-who-btn.active { border-color:var(--accent);color:var(--accent);background:var(--cream); }
+
 </style>
 </head>
 <body>
 
 <div class="stars" id="stars"></div>
 
-<!-- top message banner -->
-<div id="top-message" style="
-  position:relative;z-index:10;
-  background:var(--warm);
-  border-bottom:1px solid var(--blush);
-  padding:14px 24px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  flex-wrap:wrap;
-">
-  <span style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--deep);line-height:1.5;flex:1;" id="top-msg-text">loading...</span>
-  <span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);white-space:nowrap;opacity:0.8;" id="top-msg-date"></span>
-</div>
 <canvas id="bird-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
 
 <section class="hero">
@@ -362,6 +757,19 @@
     <p style="font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-top:0.4rem;opacity:0.7;">سهام — arrows</p>
   </div>
   <p class="hero-sub">Hey lol, this is for you!</p>
+  <div class="clocks-wrap">
+    <div class="clock-item">
+      <span class="clock-city">🇺🇸 boston</span>
+      <span class="clock-time" id="clock-boston">--:--</span>
+      <span class="clock-diff" id="clock-boston-diff"></span>
+    </div>
+    <div class="clock-separator">♡</div>
+    <div class="clock-item">
+      <span class="clock-city">🇩🇿 algeria</span>
+      <span class="clock-time" id="clock-algeria">--:--</span>
+      <span class="clock-diff" id="clock-algeria-diff"></span>
+    </div>
+  </div>
   <button id="music-btn"><span class="note">♩</span> play piano</button>
   <div class="scroll-hint">
     <span>scroll</span>
@@ -383,9 +791,13 @@
 <div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
 
 <section class="reasons-section">
-  <h2 class="reasons-intro">reasons I love <em>you</em></h2>
+  <h2 class="reasons-intro" id="reasons-title" style="cursor:default;">reasons I love <em>you</em></h2>
   <p class="reasons-desc">tap each one to reveal</p>
+  <div class="edit-mode-indicator" id="edit-indicator"><div class="edit-mode-dot"></div> edit mode — click any card to change it</div>
   <div class="reasons-grid" id="reasons-grid"></div>
+  <div style="text-align:center;">
+    <button class="edit-done-btn" id="edit-done-btn">done editing ✓</button>
+  </div>
 </section>
 
 <div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
@@ -544,6 +956,92 @@
   </div>
 </section>
 
+<!-- ── MOOD PICKER ── -->
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+<section class="mood-section">
+  <span class="section-tag">mood check</span>
+  <h2 class="reasons-intro" style="margin-bottom:0.5rem;">how are you <em>feeling?</em></h2>
+  <p class="reasons-desc" style="margin-bottom:0;">pick one — he'll see it</p>
+  <div class="mood-wrap">
+    <div class="mood-grid" id="mood-grid"></div>
+    <div class="mood-display" id="mood-display">
+      <div class="mood-his-wrap" id="mood-his-wrap" style="display:none;">
+        <div class="mood-his-label">abood is feeling</div>
+        <div class="mood-his-val" id="mood-his-val"></div>
+      </div>
+      <div id="mood-her-wrap" style="display:none;margin-top:10px;">
+        <div class="mood-his-label">siham is feeling</div>
+        <div class="mood-his-val" id="mood-her-val"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DRAWING CANVAS ── -->
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+<section class="draw-section">
+  <span class="section-tag">for you</span>
+  <h2 class="reasons-intro" style="margin-bottom:0.5rem;">draw <em>something</em></h2>
+  <p class="reasons-desc" style="margin-bottom:1.8rem;">leave her a doodle, she can draw one back</p>
+  <div class="draw-wrap">
+    <div class="draw-toolbar">
+      <div class="draw-color active" data-color="#2C1810" style="background:#2C1810;"></div>
+      <div class="draw-color" data-color="#C4785A" style="background:#C4785A;"></div>
+      <div class="draw-color" data-color="#7A9A5A" style="background:#7A9A5A;"></div>
+      <div class="draw-color" data-color="#7A5AA0" style="background:#7A5AA0;"></div>
+      <div class="draw-color" data-color="#E8C8B8" style="background:#E8C8B8;border:1px solid #ccc;"></div>
+      <div style="width:1px;height:20px;background:var(--blush);margin:0 4px;"></div>
+      <button class="draw-size active" data-size="3">thin</button>
+      <button class="draw-size" data-size="7">med</button>
+      <button class="draw-size" data-size="14">thick</button>
+      <div class="draw-spacer"></div>
+      <button class="draw-action" id="draw-eraser">eraser</button>
+      <button class="draw-action" id="draw-clear">clear</button>
+    </div>
+    <canvas id="draw-canvas" height="300"></canvas>
+    <div class="draw-footer">
+      <span class="draw-hint">draw anything ✦</span>
+      <button class="draw-save-btn" id="draw-save-btn">save drawing</button>
+    </div>
+    <div class="draw-saved-gallery" id="draw-gallery">
+      <div class="draw-gallery-label">saved drawings</div>
+      <div class="draw-gallery-grid" id="draw-gallery-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MEMORY JAR ── -->
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+<section class="jar-section">
+  <span class="section-tag">memory jar</span>
+  <h2 class="reasons-intro" style="margin-bottom:0.5rem;">our <em>memories</em></h2>
+  <p class="reasons-desc" style="margin-bottom:1.8rem;">drop in a favorite moment — big or small</p>
+
+  <div class="jar-visual" id="jar-visual">
+    <svg width="90" height="120" viewBox="0 0 90 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="28" y="8" width="34" height="10" rx="3" fill="none" stroke="#C4785A" stroke-width="1.5"/>
+      <path d="M15 22 Q10 60 12 95 Q14 112 45 112 Q76 112 78 95 Q80 60 75 22 Z" fill="#FAF7F2" stroke="#C4785A" stroke-width="1.5"/>
+      <path d="M15 22 Q10 50 12 70" stroke="#E8C8B8" stroke-width="1" fill="none"/>
+      <ellipse cx="45" cy="22" rx="30" ry="7" fill="#F0E8DA" stroke="#C4785A" stroke-width="1.5"/>
+      <!-- little folded papers inside -->
+      <rect x="28" y="55" width="18" height="12" rx="2" fill="#C4785A" opacity="0.3" transform="rotate(-8 28 55)"/>
+      <rect x="44" y="65" width="16" height="11" rx="2" fill="#C4785A" opacity="0.25" transform="rotate(5 44 65)"/>
+      <rect x="33" y="78" width="20" height="12" rx="2" fill="#C4785A" opacity="0.2" transform="rotate(-3 33 78)"/>
+    </svg>
+  </div>
+
+  <div class="jar-input-wrap">
+    <div class="jar-who">
+      <button class="jar-who-btn active" data-who="abood">abood</button>
+      <button class="jar-who-btn" data-who="siham">siham</button>
+    </div>
+    <textarea id="jar-input" placeholder="write a memory..."></textarea>
+    <button class="jar-submit" id="jar-submit">add to jar ✦</button>
+    <div style="clear:both;"></div>
+  </div>
+  <div class="jar-memories" id="jar-memories"></div>
+</section>
+
 <div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
 
 <div class="footer" id="footer">
@@ -553,10 +1051,6 @@
 
 <script>
 
-// ── TOP MESSAGE (edit this whenever you want) ──
-const TOP_MESSAGE = "hey siham — made this for you, hope you like it ♡";
-document.getElementById('top-msg-text').textContent = TOP_MESSAGE;
-document.getElementById('top-msg-date').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'});
 
 // ── Stars ──
 const starsEl = document.getElementById('stars');
@@ -572,19 +1066,108 @@ for (let i = 0; i < 60; i++) {
 }
 
 // ── Reasons ──
-const reasons = [
+// ── REASONS with hidden edit mode ──
+const DEFAULT_REASONS = [
   "everything","eyes lol","hair.","lips ofc stop being insecure",
   "smarty smart fr","yk what im thinking of","U speak french thats lwk hella cool",
   "i dont wanna kms anymore","hi hey lmfao lol, any pic honestly make my day",
 ];
+
+function getReasons() {
+  try {
+    const saved = localStorage.getItem('siham_reasons');
+    return saved ? JSON.parse(saved) : DEFAULT_REASONS.map(t => ({ text: t, isNew: false }));
+  } catch(e) { return DEFAULT_REASONS.map(t => ({ text: t, isNew: false })); }
+}
+function saveReasons(arr) {
+  localStorage.setItem('siham_reasons', JSON.stringify(arr));
+  if (window._fb) {
+    const { db, ref, set } = window._fb;
+    set(ref(db, 'reasons'), arr);
+  }
+}
+
+function formatReasonDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+let editMode = false;
 const grid = document.getElementById('reasons-grid');
-reasons.forEach((r, i) => {
-  const card = document.createElement('div');
-  card.className = 'reason-card';
-  card.innerHTML = `<span class="reason-num">${String(i+1).padStart(2,'0')}</span><span class="reason-lock">tap to reveal</span><span class="reason-text">${r}</span>`;
-  card.addEventListener('click', () => card.classList.toggle('revealed'));
-  grid.appendChild(card);
+const editIndicator = document.getElementById('edit-indicator');
+const editDoneBtn   = document.getElementById('edit-done-btn');
+
+function renderReasons() {
+  const reasons = getReasons();
+  grid.innerHTML = '';
+  reasons.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'reason-card' + (r.isNew ? ' is-new' : '');
+    card.dataset.idx = i;
+
+    if (editMode) {
+      // show editable input
+      card.style.cursor = 'text';
+      const editDateLabel = r.updatedAt ? `<span class="reason-updated">${formatReasonDate(r.updatedAt)}</span>` : '';
+      card.innerHTML = `
+        <span class="reason-num">${String(i+1).padStart(2,'0')}</span>
+        <input class="reason-edit-input" value="${escHtml(r.text)}" placeholder="write a reason...">
+        ${editDateLabel}
+      `;
+      card.querySelector('input').addEventListener('change', e => {
+        const arr = getReasons();
+        arr[i] = { text: e.target.value.trim(), isNew: true, updatedAt: Date.now() };
+        saveReasons(arr);
+      });
+      card.querySelector('input').addEventListener('click', e => e.stopPropagation());
+    } else {
+      const dateLabel = r.updatedAt ? `<span class="reason-updated">${formatReasonDate(r.updatedAt)}</span>` : '';
+      card.innerHTML = `
+        <span class="reason-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="reason-lock">tap to reveal</span>
+        <span class="reason-text">${escHtml(r.text)}</span>
+        ${dateLabel}
+      `;
+      card.addEventListener('click', () => {
+        card.classList.toggle('revealed');
+        // mark as seen when revealed — removes the "new" badge
+        if (card.classList.contains('revealed') && r.isNew) {
+          const arr = getReasons();
+          arr[i].isNew = false;
+          saveReasons(arr);
+          card.classList.remove('is-new');
+        }
+      });
+    }
+    grid.appendChild(card);
+  });
+}
+
+// secret: triple-click the title to enter edit mode
+let titleClickCount = 0, titleClickTimer;
+document.getElementById('reasons-title').addEventListener('click', () => {
+  titleClickCount++;
+  clearTimeout(titleClickTimer);
+  titleClickTimer = setTimeout(() => {
+    if (titleClickCount >= 3) {
+      editMode = !editMode;
+      editIndicator.classList.toggle('show', editMode);
+      editDoneBtn.classList.toggle('show', editMode);
+      renderReasons();
+    }
+    titleClickCount = 0;
+  }, 400);
 });
+
+editDoneBtn.addEventListener('click', () => {
+  editMode = false;
+  editIndicator.classList.remove('show');
+  editDoneBtn.classList.remove('show');
+  renderReasons();
+});
+
+renderReasons();
 
 // ── Scroll reveal ──
 const observer = new IntersectionObserver(entries => {
@@ -1038,6 +1621,17 @@ function loadEmailJS(cb) {
   document.head.appendChild(s);
 }
 
+function sendEmail(type, message) {
+  loadEmailJS(() => {
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      suggestion: message,   // reuse existing {{suggestion}} variable
+      type: type,
+      message: message,
+      sent_at: new Date().toLocaleString(),
+    }).catch(err => console.warn('EmailJS:', err));
+  });
+}
+
 // ── SUGGESTION BOX ──
 const suggestInput = document.getElementById('suggest-input');
 const suggestBtn   = document.getElementById('suggest-btn');
@@ -1406,6 +2000,9 @@ Promise.all([
     renderCal();
   });
 
+  // stickies — live sync
+  window.dispatchEvent(new Event('firebase-ready-stickies'));
+
   // suggestions — live sync
   onValue(ref(db, 'suggestions'), snap => {
     const data = snap.val() || {};
@@ -1415,6 +2012,327 @@ Promise.all([
   });
 
 }).catch(err => console.warn('Firebase failed to load:', err));
+
+
+
+
+// ── TIMEZONE CLOCKS ──
+function updateClocks() {
+  const now = new Date();
+
+  const boston  = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const algeria = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Algiers' }));
+
+  const fmt = d => d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  document.getElementById('clock-boston').textContent  = fmt(boston);
+  document.getElementById('clock-algeria').textContent = fmt(algeria);
+
+  // Algeria is ahead of Boston — show fixed labels
+  const bH = boston.getHours();
+  const aH = algeria.getHours();
+  let diff = aH - bH;
+  if (diff < 0) diff += 24;
+  const absDiff = diff > 12 ? 24 - diff : diff;
+  const label = absDiff + 'h behind';
+
+  document.getElementById('clock-boston-diff').textContent  = label;
+  document.getElementById('clock-algeria-diff').textContent = '';
+}
+
+updateClocks();
+setInterval(updateClocks, 1000);
+
+</script>
+
+<!-- sticky notes -->
+<div class="sticky-note left" id="sticky-left">
+  <div class="sticky-inner">
+    <div class="sticky-pin"></div>
+    <div class="sticky-from">abood → siham</div>
+    <textarea class="sticky-text" id="sticky-left-text" placeholder="write her something..." rows="4"></textarea>
+    <button class="sticky-save" id="sticky-left-save">save</button>
+    <div class="sticky-date" id="sticky-left-date"></div>
+  </div>
+</div>
+
+<div class="sticky-note right" id="sticky-right">
+  <div class="sticky-inner">
+    <div class="sticky-pin"></div>
+    <div class="sticky-from">siham → abood</div>
+    <textarea class="sticky-text" id="sticky-right-text" placeholder="write him something..." rows="4"></textarea>
+    <button class="sticky-save" id="sticky-right-save">save</button>
+    <div class="sticky-date" id="sticky-right-date"></div>
+  </div>
+</div>
+
+<button id="dark-toggle">🌙</button>
+<script>
+  (function() {
+    var btn = document.getElementById('dark-toggle');
+    if (localStorage.getItem('siham_theme') === 'dark') {
+      document.body.classList.add('dark');
+      btn.textContent = '☀️';
+    }
+    btn.addEventListener('click', function() {
+      var isDark = document.body.classList.toggle('dark');
+      btn.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('siham_theme', isDark ? 'dark' : 'light');
+    });
+  })();
+
+// ── MOOD PICKER ──
+const MOODS = [
+  { emoji:'😊', label:'happy' },
+  { emoji:'🥰', label:'lovey' },
+  { emoji:'😴', label:'sleepy' },
+  { emoji:'😤', label:'annoyed' },
+  { emoji:'😢', label:'sad' },
+  { emoji:'🤩', label:'excited' },
+  { emoji:'😌', label:'peaceful' },
+  { emoji:'🥺', label:'missing you' },
+  { emoji:'😂', label:'silly' },
+  { emoji:'😩', label:'stressed' },
+];
+
+const moodGrid = document.getElementById('mood-grid');
+MOODS.forEach(m => {
+  const btn = document.createElement('button');
+  btn.className = 'mood-btn';
+  btn.innerHTML = `${m.emoji} <span>${m.label}</span>`;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // save to firebase — she picks her mood, he picks his
+    // use a fixed "her" key for siham, "his" for abood
+    // we don't know who's who so save under 'current_mood' and let both see
+    const obj = { emoji: m.emoji, label: m.label, ts: Date.now() };
+    localStorage.setItem('siham_mood_siham', JSON.stringify(obj));
+    if (window._fb) {
+      const { db, ref, set } = window._fb;
+      set(ref(db, 'mood/siham'), obj);
+    }
+    updateMoodDisplay();
+    sendEmail('💭 mood update', 'Siham is feeling: ' + m.emoji + ' ' + m.label);
+  });
+  moodGrid.appendChild(btn);
+});
+
+function updateMoodDisplay() {
+  const display = document.getElementById('mood-display');
+  const hisWrap = document.getElementById('mood-his-wrap');
+  const herWrap = document.getElementById('mood-her-wrap');
+  let show = false;
+
+  const sihamMood = (() => { try { return JSON.parse(localStorage.getItem('siham_mood_siham')); } catch(e){ return null; } })();
+  const aboodMood = (() => { try { return JSON.parse(localStorage.getItem('siham_mood_abood')); } catch(e){ return null; } })();
+
+  if (sihamMood) {
+    herWrap.style.display = 'block';
+    document.getElementById('mood-her-val').textContent = sihamMood.emoji + ' ' + sihamMood.label;
+    show = true;
+  }
+  if (aboodMood) {
+    hisWrap.style.display = 'block';
+    document.getElementById('mood-his-val').textContent = aboodMood.emoji + ' ' + aboodMood.label;
+    show = true;
+  }
+  display.classList.toggle('show', show);
+}
+updateMoodDisplay();
+
+// ── DRAWING CANVAS ──
+const drawCanvas = document.getElementById('draw-canvas');
+const dctx = drawCanvas.getContext('2d');
+drawCanvas.width = drawCanvas.offsetWidth || 580;
+
+let drawing = false;
+let drawColor = '#2C1810';
+let drawSize  = 3;
+let erasing   = false;
+let lastX = 0, lastY = 0;
+
+function getPos(e) {
+  const r = drawCanvas.getBoundingClientRect();
+  const scaleX = drawCanvas.width / r.width;
+  const scaleY = drawCanvas.height / r.height;
+  const src = e.touches ? e.touches[0] : e;
+  return [(src.clientX - r.left) * scaleX, (src.clientY - r.top) * scaleY];
+}
+
+dctx.fillStyle = '#FAF7F2';
+dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+drawCanvas.addEventListener('mousedown',  e => { drawing=true; [lastX,lastY]=getPos(e); });
+drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; [lastX,lastY]=getPos(e); }, {passive:false});
+drawCanvas.addEventListener('mouseup',   () => { drawing=false; dctx.beginPath(); });
+drawCanvas.addEventListener('touchend',  () => { drawing=false; dctx.beginPath(); });
+drawCanvas.addEventListener('mouseleave',() => { drawing=false; });
+
+function drawStroke(e) {
+  if (!drawing) return;
+  e.preventDefault();
+  const [x, y] = getPos(e);
+  dctx.beginPath();
+  dctx.moveTo(lastX, lastY);
+  dctx.lineTo(x, y);
+  dctx.strokeStyle = erasing ? '#FAF7F2' : drawColor;
+  dctx.lineWidth   = erasing ? drawSize * 4 : drawSize;
+  dctx.lineCap = 'round';
+  dctx.lineJoin = 'round';
+  dctx.stroke();
+  [lastX, lastY] = [x, y];
+}
+
+drawCanvas.addEventListener('mousemove', drawStroke);
+drawCanvas.addEventListener('touchmove', drawStroke, {passive:false});
+
+// toolbar
+document.querySelectorAll('.draw-color').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.draw-color').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+    drawColor = el.dataset.color;
+    erasing = false;
+    document.getElementById('draw-eraser').style.borderColor = '';
+    document.getElementById('draw-eraser').style.color = '';
+  });
+});
+document.querySelectorAll('.draw-size').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.draw-size').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+    drawSize = parseInt(el.dataset.size);
+  });
+});
+document.getElementById('draw-eraser').addEventListener('click', function() {
+  erasing = !erasing;
+  this.style.borderColor = erasing ? 'var(--accent)' : '';
+  this.style.color = erasing ? 'var(--accent)' : '';
+});
+document.getElementById('draw-clear').addEventListener('click', () => {
+  dctx.fillStyle = '#FAF7F2';
+  dctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+});
+
+// save drawing
+const drawGallery = document.getElementById('draw-gallery');
+const drawGalleryGrid = document.getElementById('draw-gallery-grid');
+
+function loadDrawings() {
+  try { return JSON.parse(localStorage.getItem('siham_drawings')||'[]'); } catch(e){ return []; }
+}
+function renderDrawings() {
+  const drawings = loadDrawings();
+  if (!drawings.length) { drawGallery.classList.remove('show'); return; }
+  drawGallery.classList.add('show');
+  drawGalleryGrid.innerHTML = '';
+  drawings.slice().reverse().forEach(d => {
+    const img = document.createElement('img');
+    img.className = 'draw-thumb';
+    img.src = d.data;
+    img.title = d.date;
+    drawGalleryGrid.appendChild(img);
+  });
+}
+renderDrawings();
+
+document.getElementById('draw-save-btn').addEventListener('click', () => {
+  const data = drawCanvas.toDataURL('image/png');
+  const drawings = loadDrawings();
+  drawings.push({ data, date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}) });
+  if (drawings.length > 12) drawings.shift(); // keep last 12
+  localStorage.setItem('siham_drawings', JSON.stringify(drawings));
+  renderDrawings();
+  // flash feedback
+  const btn = document.getElementById('draw-save-btn');
+  btn.textContent = 'saved ✓';
+  setTimeout(() => btn.textContent = 'save drawing', 1500);
+  sendEmail('🎨 new drawing', 'Siham saved a new drawing on ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric'}));
+});
+
+// ── MEMORY JAR ──
+function getMemories() {
+  try { return JSON.parse(localStorage.getItem('siham_memories')||'[]'); } catch(e){ return []; }
+}
+function saveMemories(arr) {
+  localStorage.setItem('siham_memories', JSON.stringify(arr));
+  if (window._fb) {
+    const { db, ref, set } = window._fb;
+    const obj = {};
+    arr.forEach((m,i) => obj['m'+i] = m);
+    set(ref(db, 'memories'), obj);
+  }
+}
+function renderMemories() {
+  const el = document.getElementById('jar-memories');
+  const mems = getMemories();
+  el.innerHTML = '';
+  if (!mems.length) {
+    el.innerHTML = '<p class="jar-empty">the jar is empty — add your first memory</p>';
+    return;
+  }
+  mems.slice().reverse().forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'jar-memory';
+    div.innerHTML = `
+      <div class="jar-memory-text">${escHtml(m.text)}</div>
+      <div class="jar-memory-meta">
+        <span class="jar-memory-date">${m.date}</span>
+        <span class="jar-memory-by">${m.who}</span>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+let jarWho = 'abood';
+document.querySelectorAll('.jar-who-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.jar-who-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    jarWho = btn.dataset.who;
+  });
+});
+
+document.getElementById('jar-submit').addEventListener('click', () => {
+  const text = document.getElementById('jar-input').value.trim();
+  if (!text) return;
+  const mems = getMemories();
+  mems.push({
+    text,
+    who: jarWho,
+    date: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+  });
+  saveMemories(mems);
+  sendEmail('🫙 new memory', 'From ' + jarWho + ': ' + text);
+  document.getElementById('jar-input').value = '';
+  renderMemories();
+  // little jar bounce
+  const jar = document.getElementById('jar-visual');
+  jar.style.transform = 'scale(1.08)';
+  setTimeout(() => jar.style.transform = '', 300);
+});
+
+renderMemories();
+
+// sync mood from firebase
+window.addEventListener('firebase-ready-stickies', () => {
+  if (!window._fb) return;
+  const { db, ref, onValue } = window._fb;
+  onValue(ref(db, 'mood'), snap => {
+    const data = snap.val() || {};
+    if (data.siham) localStorage.setItem('siham_mood_siham', JSON.stringify(data.siham));
+    if (data.abood) localStorage.setItem('siham_mood_abood', JSON.stringify(data.abood));
+    updateMoodDisplay();
+  });
+  onValue(ref(db, 'memories'), snap => {
+    const data = snap.val() || {};
+    const arr = Object.values(data);
+    localStorage.setItem('siham_memories', JSON.stringify(arr));
+    renderMemories();
+  });
+});
 
 </script>
 </body>
